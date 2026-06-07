@@ -1,0 +1,126 @@
+.cell {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1rem, 4.5vw, 1.5rem);
+  font-weight: 500;
+  border: 1px solid var(--color-border-thin);
+  background-color: var(--color-surface);
+  cursor: pointer;
+  user-select: none;
+  color: var(--color-text);
+  position: relative;
+  transition: background-color 0.12s ease, box-shadow 0.12s ease;
+  min-height: var(--touch-min);
+  min-width: var(--touch-min);
+}
+
+.cell:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.cell:active {
+  background-color: var(--color-cell-highlight);
+}
+
+/* 固定格 */
+.fixed {
+  background-color: var(--color-cell-fixed);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* 选中格 */
+.selected {
+  background-color: var(--color-cell-selected) !important;
+  box-shadow: inset 0 0 0 2px var(--color-accent);
+}
+
+/* 同行列宫高亮 */
+.highlighted {
+  background-color: var(--color-cell-highlight);
+}
+
+/* 同数字高亮 */
+.sameNumber {
+  background-color: var(--color-cell-same-number);
+}
+
+/* 错误输入 */
+.error {
+  color: var(--color-danger);
+}
+
+/* 数值填入动画 */
+.valueAppear {
+  display: inline-block;
+  animation: valuePop 0.2s ease-out;
+}
+
+@keyframes valuePop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* 有候选数时降低主数字字号占位 */
+.hasCandidates {
+  padding: 1px;
+}
+
+/* 候选数网格 */
+.candidates {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-items: center;
+}
+
+.candidate {
+  font-size: clamp(0.55rem, 1.8vw, 0.65rem);
+  font-weight: 500;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+/* 3x3 宫粗边框 */
+.borderRightThick {
+  border-right: 2px solid var(--color-border-thick);
+}
+
+.borderBottomThick {
+  border-bottom: 2px solid var(--color-border-thick);
+}
+
+/* 可编辑格 hover（桌面端） */
+@media (hover: hover) {
+  .cell:not(.fixed):hover {
+    background-color: var(--color-cell-highlight);
+  }
+}
+
+/* 移动端粗边框微调 */
+@media (max-width: 480px) {
+  .borderRightThick {
+    border-right-width: 1.5px;
+  }
+
+  .borderBottomThick {
+    border-bottom-width: 1.5px;
+  }
+}

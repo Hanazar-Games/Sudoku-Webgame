@@ -1,0 +1,18 @@
+.board {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 2px solid var(--color-border-thick);
+  background-color: var(--color-border-thick);
+  gap: 1px;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 480px) {
+  .board {
+    border-width: 1.5px;
+  }
+}

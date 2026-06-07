@@ -1,0 +1,128 @@
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-sm);
+  margin-top: var(--space-sm);
+  width: 100%;
+}
+
+.topRow {
+  display: flex;
+  gap: var(--space-sm);
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actionRow {
+  display: flex;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-min);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease;
+  cursor: pointer;
+  flex: 1 1 auto;
+  max-width: 120px;
+}
+
+.button:hover:not(:disabled) {
+  background-color: var(--color-bg);
+  border-color: var(--color-accent);
+}
+
+.button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.buttonPrimary {
+  composes: button;
+  color: #ffffff;
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.buttonPrimary:hover:not(:disabled) {
+  background-color: var(--color-accent-hover);
+  border-color: var(--color-accent-hover);
+}
+
+.buttonActive {
+  background-color: var(--color-accent);
+  color: #ffffff;
+  border-color: var(--color-accent);
+}
+
+.select {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  padding: var(--space-sm) var(--space-md);
+  font-size: var(--text-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-surface);
+  cursor: pointer;
+  color: var(--color-text);
+}
+
+.completed {
+  color: var(--color-success);
+  font-weight: 600;
+  font-size: var(--text-base);
+  animation: slideUp 0.4s ease-out;
+}
+
+.noteHint {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  min-height: 1.25rem;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .controls {
+    gap: var(--space-xs);
+    margin-top: var(--space-xs);
+  }
+
+  .button {
+    font-size: var(--text-xs);
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .select {
+    font-size: var(--text-xs);
+    padding: var(--space-xs) var(--space-sm);
+  }
+}
