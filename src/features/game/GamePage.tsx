@@ -17,7 +17,7 @@ function GameContent() {
       <div className={styles.boardWrapper} inert={isPaused || undefined}>
         <Board />
         {isPaused && (
-          <div className={styles.pauseOverlay} role="dialog" aria-label="游戏已暂停">
+          <div className={styles.pauseOverlay} role="dialog" aria-modal="true" aria-label="游戏已暂停">
             <span className={styles.pauseText}>已暂停</span>
             <span className={styles.resumeHint}>点击“继续”恢复游戏</span>
           </div>

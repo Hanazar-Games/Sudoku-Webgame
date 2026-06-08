@@ -98,4 +98,29 @@ describe('Board', () => {
 
     document.body.removeChild(select)
   })
+
+  it('ignores number keys when focus is on a button outside the board', () => {
+    renderWithProvider(<Board />)
+
+    // Click an empty cell first to establish a selected cell
+    const cells = screen.getAllByRole('button')
+    const emptyCell = cells.find((c) => c.textContent === '')
+    if (!emptyCell) throw new Error('No empty cell found')
+    fireEvent.click(emptyCell)
+
+    // Create a button outside the board and focus it
+    const button = document.createElement('button')
+    document.body.appendChild(button)
+    button.focus()
+
+    const preventDefaultSpy = vi.fn()
+    fireEvent.keyDown(button, { key: '5', preventDefault: preventDefaultSpy })
+
+    // Board should not have prevented default (it ignored the event)
+    expect(preventDefaultSpy).not.toHaveBeenCalled()
+    // The previously empty cell should still be empty
+    expect(emptyCell.textContent).toBe('')
+
+    document.body.removeChild(button)
+  })
 })

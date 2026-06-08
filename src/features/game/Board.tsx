@@ -25,6 +25,18 @@ export function Board() {
         target.isContentEditable
       if (isFormElement) return
 
+      // 如果焦点在棋盘外的可交互元素（按钮、链接）上，不拦截数字键/方向键
+      const inBoard =
+        typeof target.closest === 'function' &&
+        target.closest('[role="grid"]') !== null
+      const isInteractiveOutside =
+        !inBoard &&
+        (target.tagName === 'BUTTON' ||
+          target.tagName === 'A' ||
+          (typeof target.closest === 'function' &&
+            target.closest('button, a') !== null))
+      if (isInteractiveOutside) return
+
       // ESC 始终响应（暂停/恢复）
       if (e.key === 'Escape') {
         e.preventDefault()

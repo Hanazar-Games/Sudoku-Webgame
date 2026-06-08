@@ -25,9 +25,13 @@ export function GameControls() {
         <select
           className={styles.select}
           value={difficulty}
-          onChange={(e) =>
-            dispatch({ type: 'CHANGE_DIFFICULTY', difficulty: e.target.value as Difficulty })
-          }
+          onChange={(e) => {
+            const value = e.target.value
+            const validDifficulties: readonly string[] = ['easy', 'medium', 'hard']
+            if (validDifficulties.includes(value)) {
+              dispatch({ type: 'CHANGE_DIFFICULTY', difficulty: value as Difficulty })
+            }
+          }}
           aria-label="难度"
         >
           <option value="easy">简单</option>
@@ -96,7 +100,7 @@ export function GameControls() {
       </div>
 
       <div className={styles.noteHint} aria-live="polite">
-        {isNoteMode ? '笔记模式：按数字键标记或取消候选数' : '\u00A0'}
+        {isNoteMode ? '笔记模式：按数字键标记或取消候选数' : ''}
       </div>
 
       {isComplete && (

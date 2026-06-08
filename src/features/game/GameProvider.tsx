@@ -2,6 +2,7 @@ import { useReducer, useEffect, useRef, type ReactNode } from 'react'
 import { GameContext } from './GameContext'
 import { gameReducer, createInitialState } from './gameReducer'
 import type { GameState } from './gameReducer'
+import type { Cell } from '../../types'
 import { solve } from '../../lib/sudoku'
 
 const SAVE_KEY = 'sudoku-game-save-v1'
@@ -10,12 +11,31 @@ function extractPuzzle(board: GameState['board']): GameState['solution'] {
   return board.map((row) => row.map((cell) => (cell.isFixed ? cell.value : null)))
 }
 
+function isValidBoard(board: unknown): board is Cell[][] {
+  if (!Array.isArray(board) || board.length !== 9) return false
+  return board.every((row) => {
+    if (!Array.isArray(row) || row.length !== 9) return false
+    return row.every((cell) => {
+      return (
+        cell &&
+        typeof cell === 'object' &&
+        typeof cell.row === 'number' &&
+        typeof cell.col === 'number' &&
+        (cell.value === null || typeof cell.value === 'number') &&
+        typeof cell.isFixed === 'boolean' &&
+        Array.isArray(cell.candidates)
+      )
+    })
+  })
+}
+
 function loadSavedState(): GameState | null {
   try {
     const raw = localStorage.getItem(SAVE_KEY)
     if (!raw) return null
     const parsed = JSON.parse(raw) as Omit<GameState, 'solution'>
-    if (!parsed.board || !parsed.difficulty) return null
+    if (!isValidBoard(parsed.board)) return null
+    if (!parsed.difficulty) return null
 
     // Re-derive solution from fixed cells
     const puzzle = extractPuzzle(parsed.board)
