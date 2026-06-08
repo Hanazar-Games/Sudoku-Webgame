@@ -25,7 +25,7 @@ function GameContent() {
       </div>
 
       <p className={styles.status}>
-        点击或按方向键选中格子，按 1-9 填数，退格或 Delete 清除。ESC 暂停。
+        点击或按方向键选中格子，使用键盘或下方数字键填数，方向键移动，ESC 暂停/继续。
       </p>
 
       <GameControls />

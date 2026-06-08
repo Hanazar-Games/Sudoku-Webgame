@@ -17,7 +17,7 @@
 
 .actionRow {
   display: flex;
-  gap: var(--space-xs);
+  gap: var(--space-sm);
   flex-wrap: wrap;
   justify-content: center;
   width: 100%;
@@ -84,6 +84,12 @@
   background-color: var(--color-surface);
   cursor: pointer;
   color: var(--color-text);
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a5a5e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2rem;
 }
 
 .completed {
@@ -110,6 +116,60 @@
   }
 }
 
+/* 虚拟数字键盘 */
+.keypad {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+  justify-content: center;
+  width: 100%;
+  margin-top: var(--space-sm);
+}
+
+.key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  flex: 1 1 44px;
+  max-width: 56px;
+  padding: var(--space-xs);
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  user-select: none;
+}
+
+.key:hover:not(:disabled) {
+  background-color: var(--color-bg);
+  border-color: var(--color-accent);
+}
+
+.key:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.key:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.keyClear {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.keyClear:hover:not(:disabled) {
+  background-color: var(--color-cell-error);
+  border-color: var(--color-danger);
+}
+
 @media (max-width: 480px) {
   .controls {
     gap: var(--space-xs);
@@ -124,5 +184,13 @@
   .select {
     font-size: var(--text-xs);
     padding: var(--space-xs) var(--space-sm);
+  }
+
+  .key {
+    font-size: var(--text-sm);
+    min-height: 40px;
+    min-width: 40px;
+    max-width: 48px;
+    padding: var(--space-xs);
   }
 }

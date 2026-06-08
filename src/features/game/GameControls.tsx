@@ -103,6 +103,31 @@ export function GameControls() {
         {isNoteMode ? '笔记模式：按数字键标记或取消候选数' : ''}
       </div>
 
+      {/* 虚拟数字键盘 */}
+      <div className={styles.keypad}>
+        {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => (
+          <button
+            key={n}
+            className={styles.key}
+            type="button"
+            onClick={() => dispatch({ type: 'SET_VALUE', value: n })}
+            disabled={isPaused || isComplete}
+            aria-label={`输入 ${n}`}
+          >
+            {n}
+          </button>
+        ))}
+        <button
+          className={`${styles.key} ${styles.keyClear}`}
+          type="button"
+          onClick={() => dispatch({ type: 'CLEAR_VALUE' })}
+          disabled={isPaused || isComplete}
+          aria-label="清除"
+        >
+          ⌫
+        </button>
+      </div>
+
       {isComplete && (
         <span className={styles.completed} role="status" aria-live="polite">
           恭喜完成！用时：{formatTime(elapsedTime)}

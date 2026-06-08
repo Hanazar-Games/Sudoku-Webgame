@@ -25,14 +25,6 @@
   letter-spacing: -0.02em;
 }
 
-.timer {
-  font-size: var(--text-lg);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--color-text-secondary);
-  letter-spacing: 0.05em;
-}
-
 .boardWrapper {
   width: 100%;
   display: flex;
