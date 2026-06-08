@@ -28,7 +28,7 @@ export function GameControls() {
           onChange={(e) =>
             dispatch({ type: 'CHANGE_DIFFICULTY', difficulty: e.target.value as Difficulty })
           }
-          aria-label="Difficulty"
+          aria-label="难度"
         >
           <option value="easy">简单</option>
           <option value="medium">中等</option>
@@ -70,7 +70,7 @@ export function GameControls() {
           type="button"
           onClick={() => dispatch({ type: 'UNDO' })}
           disabled={!canUndo}
-          aria-label="Undo"
+          aria-label="撤销"
         >
           撤销
         </button>
@@ -80,7 +80,7 @@ export function GameControls() {
           type="button"
           onClick={() => dispatch({ type: 'REDO' })}
           disabled={!canRedo}
-          aria-label="Redo"
+          aria-label="重做"
         >
           重做
         </button>

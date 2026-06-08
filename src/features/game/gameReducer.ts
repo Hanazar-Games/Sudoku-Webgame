@@ -149,6 +149,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const { row, col } = state.selectedCell
       const cell = state.board[row][col]
       if (cell.isFixed) return state
+      if (action.value < 1 || action.value > 9) return state
 
       const newBoard = cloneBoard(state.board)
 

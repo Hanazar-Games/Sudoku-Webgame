@@ -54,6 +54,7 @@ function initState(): GameState {
 export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, undefined, initState)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const prevSaveKeyRef = useRef<string>('')
 
   // Timer
   useEffect(() => {
@@ -65,7 +66,24 @@ export function GameProvider({ children }: { children: ReactNode }) {
   }, [state.isPaused, state.isComplete])
 
   // Auto-save with debounce (3s) to reduce localStorage writes
+  // Exclude elapsedTime to avoid resetting the debounce timer every second
   useEffect(() => {
+    const saveKey = JSON.stringify({
+      board: state.board,
+      difficulty: state.difficulty,
+      isComplete: state.isComplete,
+      isNoteMode: state.isNoteMode,
+      selectedCell: state.selectedCell,
+      historyIndex: state.historyIndex,
+      moveHistoryLength: state.moveHistory.length,
+    })
+
+    if (prevSaveKeyRef.current === saveKey) {
+      // Only elapsedTime changed (TICK); keep existing debounce timer
+      return
+    }
+    prevSaveKeyRef.current = saveKey
+
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current)
     }

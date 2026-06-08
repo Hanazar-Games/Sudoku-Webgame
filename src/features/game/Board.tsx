@@ -18,14 +18,21 @@ export function Board() {
   // 键盘输入处理
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
-      if (isPaused) return
-
       // 避免拦截表单元素内的键盘事件
       const target = e.target as HTMLElement
       const isFormElement =
         ['INPUT', 'SELECT', 'TEXTAREA'].includes(target.tagName) ||
         target.isContentEditable
       if (isFormElement) return
+
+      // ESC 始终响应（暂停/恢复）
+      if (e.key === 'Escape') {
+        e.preventDefault()
+        dispatch({ type: 'TOGGLE_PAUSE' })
+        return
+      }
+
+      if (isPaused) return
 
       // 数字输入 1-9
       if (e.key >= '1' && e.key <= '9') {
@@ -38,13 +45,6 @@ export function Board() {
       if (e.key === 'Backspace' || e.key === 'Delete') {
         e.preventDefault()
         dispatch({ type: 'CLEAR_VALUE' })
-        return
-      }
-
-      // 暂停/恢复
-      if (e.key === 'Escape') {
-        e.preventDefault()
-        dispatch({ type: 'TOGGLE_PAUSE' })
         return
       }
 
@@ -81,7 +81,7 @@ export function Board() {
     <div
       className={styles.board}
       role="grid"
-      aria-label="Sudoku board"
+      aria-label="数独棋盘"
       inert={isPaused || undefined}
     >
       {board.map((row) =>

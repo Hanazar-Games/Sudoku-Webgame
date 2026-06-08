@@ -111,6 +111,21 @@ describe('gameReducer', () => {
       expect(next.board[row][col].value).toBe(5)
       expect(next.board[row][col].candidates).toEqual([])
     })
+
+    it('ignores out-of-range values', () => {
+      const state = createInitialState('easy')
+      const { row, col } = getEditableCell(state)
+      const selected = gameReducer(state, { type: 'SELECT_CELL', row, col })
+
+      const withZero = gameReducer(selected, { type: 'SET_VALUE', value: 0 })
+      expect(withZero.board[row][col].value).toBeNull()
+
+      const withTen = gameReducer(selected, { type: 'SET_VALUE', value: 10 })
+      expect(withTen.board[row][col].value).toBeNull()
+
+      const withNegative = gameReducer(selected, { type: 'SET_VALUE', value: -1 })
+      expect(withNegative.board[row][col].value).toBeNull()
+    })
   })
 
   describe('CLEAR_VALUE', () => {
