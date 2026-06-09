@@ -3,7 +3,7 @@
   --color-bg: #f5f5f7;
   --color-surface: #ffffff;
   --color-text: #1d1d1f;
-  --color-text-secondary: #5a5a5e;
+  --color-text-secondary: #5a5a5f;
   --color-border: #d2d2d7;
   --color-accent: #0071e3;
   --color-accent-hover: #0077ed;
@@ -19,6 +19,9 @@
   --color-cell-same-number: #d4e8fa;
   --color-border-thick: #1d1d1f;
   --color-border-thin: #d2d2d7;
+
+  /* Overlay */
+  --color-bg-alpha: rgba(245, 245, 247, 0.9);
 
   /* Spacing */
   --space-xs: 0.25rem;
@@ -51,4 +54,33 @@
 
   /* Touch */
   --touch-min: 44px;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-bg: #1c1c1e;
+  --color-surface: #2c2c2e;
+  --color-text: #f5f5f7;
+  --color-text-secondary: #8e8e93;
+  --color-border: #3a3a3c;
+  --color-accent: #0a84ff;
+  --color-accent-hover: #409cff;
+  --color-danger: #ff453a;
+  --color-success: #32d74b;
+  --color-warning: #ff9f0a;
+
+  --color-cell-fixed: #242426;
+  --color-cell-selected: #0a3a6a;
+  --color-cell-highlight: #1a2a3a;
+  --color-cell-error: #3a1a1a;
+  --color-cell-same-number: #1a2a4a;
+  --color-border-thick: #d0d0d0;
+  --color-border-thin: #3a3a3c;
+
+  --color-bg-alpha: rgba(28, 28, 30, 0.9);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.5);
 }
