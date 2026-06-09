@@ -1,4 +1,6 @@
+import { useRef, useEffect } from 'react'
 import { useGame } from './useGame'
+import { useStats } from './useStats'
 import { Timer } from './Timer'
 import { formatTime } from './utils'
 import type { Difficulty } from '../../types'
@@ -6,6 +8,7 @@ import styles from './GameControls.module.css'
 
 export function GameControls() {
   const { state, dispatch } = useGame()
+  const { stats, recordWin } = useStats()
   const {
     difficulty,
     isComplete,
@@ -18,6 +21,22 @@ export function GameControls() {
 
   const canUndo = historyIndex > 0
   const canRedo = historyIndex < moveHistory.length - 1
+  const diffStats = stats[difficulty]
+
+  // Detect game completion and record stats (once per game)
+  const prevIsCompleteRef = useRef(isComplete)
+
+  useEffect(() => {
+    // Reset tracking on new game (elapsedTime resets to 0 while not complete)
+    if (elapsedTime === 0 && !isComplete) {
+      prevIsCompleteRef.current = false
+    }
+
+    if (!prevIsCompleteRef.current && isComplete) {
+      recordWin(difficulty, elapsedTime)
+      prevIsCompleteRef.current = true
+    }
+  }, [isComplete, elapsedTime, difficulty, recordWin])
 
   return (
     <div className={styles.controls}>
@@ -134,6 +153,19 @@ export function GameControls() {
           恭喜完成！用时：{formatTime(elapsedTime)}
         </span>
       )}
+
+      <div className={styles.statsRow}>
+        <span className={styles.statItem}>
+          <span className={styles.statLabel}>已完成</span>
+          <span className={styles.statValue}>{diffStats.gamesWon}</span>
+        </span>
+        <span className={styles.statItem}>
+          <span className={styles.statLabel}>最佳用时</span>
+          <span className={styles.statValue}>
+            {diffStats.bestTime !== null ? formatTime(diffStats.bestTime) : '--:--'}
+          </span>
+        </span>
+      </div>
     </div>
   )
 }
