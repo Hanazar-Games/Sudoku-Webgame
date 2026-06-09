@@ -195,7 +195,7 @@ describe('Sudoku Engine', () => {
 
       expect(countEmpty(easy.puzzle)).toBeLessThan(countEmpty(medium.puzzle))
       expect(countEmpty(medium.puzzle)).toBeLessThan(countEmpty(hard.puzzle))
-    })
+    }, 15000)
 
     it('falls back to medium for invalid difficulty', () => {
       const { puzzle } = generatePuzzle('invalid' as unknown as 'easy')

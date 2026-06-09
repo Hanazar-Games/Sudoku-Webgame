@@ -44,6 +44,8 @@ export const SudokuCell = memo(function SudokuCell({
       role="button"
       tabIndex={isSelected ? 0 : -1}
       className={classNames}
+      data-testid={`cell-${row}-${col}`}
+      data-empty={value === null ? 'true' : undefined}
       onClick={() => onSelect(row, col)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
