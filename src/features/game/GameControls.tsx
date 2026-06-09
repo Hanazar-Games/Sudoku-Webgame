@@ -1,6 +1,7 @@
 import { useRef, useEffect } from 'react'
 import { useGame } from './useGame'
 import { useStats } from './useStats'
+import { useSound } from '../sound/useSound'
 import { Timer } from './Timer'
 import { formatTime } from './utils'
 import type { Difficulty } from '../../types'
@@ -9,6 +10,7 @@ import styles from './GameControls.module.css'
 export function GameControls() {
   const { state, dispatch } = useGame()
   const { stats, recordWin, resetStreak } = useStats()
+  const { play } = useSound()
   const {
     difficulty,
     isComplete,
@@ -25,6 +27,8 @@ export function GameControls() {
 
   // Detect game completion and record stats (once per game)
   const prevIsCompleteRef = useRef(isComplete)
+  const playRef = useRef(play)
+  useEffect(() => { playRef.current = play }, [play])
 
   useEffect(() => {
     // Reset tracking on new game (elapsedTime resets to 0 while not complete)
@@ -34,6 +38,7 @@ export function GameControls() {
 
     if (!prevIsCompleteRef.current && isComplete) {
       recordWin(difficulty, elapsedTime)
+      playRef.current('complete')
       prevIsCompleteRef.current = true
     }
   }, [isComplete, elapsedTime, difficulty, recordWin])
@@ -79,7 +84,7 @@ export function GameControls() {
         <button
           className={`${styles.button} ${isNoteMode ? styles.buttonActive : ''}`}
           type="button"
-          onClick={() => dispatch({ type: 'TOGGLE_NOTE_MODE' })}
+          onClick={() => { play('toggle'); dispatch({ type: 'TOGGLE_NOTE_MODE' }) }}
           aria-pressed={isNoteMode}
         >
           笔记
@@ -88,7 +93,7 @@ export function GameControls() {
         <button
           className={styles.button}
           type="button"
-          onClick={() => dispatch({ type: 'USE_HINT' })}
+          onClick={() => { play('hint'); dispatch({ type: 'USE_HINT' }) }}
           disabled={isPaused || isComplete}
         >
           提示
@@ -135,7 +140,7 @@ export function GameControls() {
             key={n}
             className={styles.key}
             type="button"
-            onClick={() => dispatch({ type: 'SET_VALUE', value: n })}
+            onClick={() => { play('fill'); dispatch({ type: 'SET_VALUE', value: n }) }}
             disabled={isPaused || isComplete}
             aria-label={`输入 ${n}`}
           >

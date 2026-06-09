@@ -25,7 +25,12 @@
   letter-spacing: -0.02em;
 }
 
-.themeToggle {
+.headerActions {
+  display: flex;
+  gap: var(--space-xs);
+}
+
+.iconButton {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -39,7 +44,7 @@
   transition: all 0.15s ease;
 }
 
-.themeToggle:hover {
+.iconButton:hover {
   background-color: var(--color-bg);
   border-color: var(--color-accent);
 }

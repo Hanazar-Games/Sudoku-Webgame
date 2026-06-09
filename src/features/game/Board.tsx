@@ -1,11 +1,21 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useGame } from './useGame'
+import { useSound } from '../sound/useSound'
 import { SudokuCell } from './SudokuCell'
 import styles from './Board.module.css'
 
 export function Board() {
   const { state, dispatch } = useGame()
+  const { play } = useSound()
   const { board, solution, selectedCell, isPaused } = state
+
+  const boardRef = useRef(board)
+  const selectedCellRef = useRef(selectedCell)
+  const playRef = useRef(play)
+
+  useEffect(() => { boardRef.current = board }, [board])
+  useEffect(() => { selectedCellRef.current = selectedCell }, [selectedCell])
+  useEffect(() => { playRef.current = play }, [play])
 
   const handleSelectCell = useCallback(
     (row: number, col: number) => {
@@ -46,9 +56,16 @@ export function Board() {
 
       if (isPaused) return
 
+      const currentSelected = selectedCellRef.current
+      const currentBoard = boardRef.current
+      const currentPlay = playRef.current
+
       // 数字输入 1-9
       if (e.key >= '1' && e.key <= '9') {
         e.preventDefault()
+        if (currentSelected && !currentBoard[currentSelected.row][currentSelected.col].isFixed) {
+          currentPlay('fill')
+        }
         dispatch({ type: 'SET_VALUE', value: parseInt(e.key, 10) })
         return
       }
@@ -56,6 +73,9 @@ export function Board() {
       // 删除 / 退格
       if (e.key === 'Backspace' || e.key === 'Delete') {
         e.preventDefault()
+        if (currentSelected && !currentBoard[currentSelected.row][currentSelected.col].isFixed) {
+          currentPlay('clear')
+        }
         dispatch({ type: 'CLEAR_VALUE' })
         return
       }

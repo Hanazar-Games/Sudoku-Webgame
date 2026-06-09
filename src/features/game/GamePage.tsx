@@ -3,26 +3,39 @@ import { GameControls } from './GameControls'
 import { GameProvider } from './GameProvider'
 import { useGame } from './useGame'
 import { useTheme } from '../theme/useTheme'
+import { useSound } from '../sound/useSound'
 import styles from './GamePage.module.css'
 
 function GameContent() {
   const { state } = useGame()
   const { theme, toggle } = useTheme()
+  const { enabled: soundEnabled, toggle: toggleSound } = useSound()
   const { isPaused } = state
 
   return (
     <main className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>Sudoku</h1>
-        <button
-          className={styles.themeToggle}
-          type="button"
-          onClick={toggle}
-          aria-label={theme === 'light' ? '切换到深色模式' : '切换到浅色模式'}
-          title={theme === 'light' ? '切换到深色模式' : '切换到浅色模式'}
-        >
-          {theme === 'light' ? '🌙' : '☀️'}
-        </button>
+        <div className={styles.headerActions}>
+          <button
+            className={styles.iconButton}
+            type="button"
+            onClick={toggleSound}
+            aria-label={soundEnabled ? '关闭音效' : '开启音效'}
+            title={soundEnabled ? '关闭音效' : '开启音效'}
+          >
+            {soundEnabled ? '🔊' : '🔇'}
+          </button>
+          <button
+            className={styles.iconButton}
+            type="button"
+            onClick={toggle}
+            aria-label={theme === 'light' ? '切换到深色模式' : '切换到浅色模式'}
+            title={theme === 'light' ? '切换到深色模式' : '切换到浅色模式'}
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
+        </div>
       </header>
 
       <div className={styles.boardWrapper}>
