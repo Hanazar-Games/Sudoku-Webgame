@@ -15,6 +15,12 @@
   align-items: center;
 }
 
+.topRight {
+  display: flex;
+  gap: var(--space-sm);
+  align-items: center;
+}
+
 .actionRow {
   display: flex;
   gap: var(--space-sm);
@@ -65,6 +71,24 @@
 .buttonPrimary:hover:not(:disabled) {
   background-color: var(--color-accent-hover);
   border-color: var(--color-accent-hover);
+}
+
+.dailyButton {
+  composes: button;
+  font-size: var(--text-lg);
+  padding: var(--space-sm);
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dailyBadge {
+  color: var(--color-success);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  animation: slideUp 0.4s ease-out;
 }
 
 .buttonActive {

@@ -18,6 +18,7 @@ export interface GameState {
 
 export type GameAction =
   | { type: 'NEW_GAME'; difficulty: Difficulty }
+  | { type: 'NEW_DAILY_CHALLENGE' }
   | { type: 'CHANGE_DIFFICULTY'; difficulty: Difficulty }
   | { type: 'SELECT_CELL'; row: number; col: number }
   | { type: 'SET_VALUE'; value: number }
@@ -110,6 +111,33 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         board,
         solution,
         difficulty: action.difficulty,
+        selectedCell: null,
+        isComplete: false,
+        isPaused: false,
+        elapsedTime: 0,
+        isNoteMode: false,
+        moveHistory: buildInitialHistory(board),
+        historyIndex: 0,
+        errorCount: 0,
+      }
+    }
+
+    case 'NEW_DAILY_CHALLENGE': {
+      const seed = (() => {
+        const today = new Date()
+        const str = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
+        let h = 0
+        for (let i = 0; i < str.length; i++) {
+          h = ((h << 5) - h + str.charCodeAt(i)) | 0
+        }
+        return Math.abs(h) || 1
+      })()
+      const { solution, puzzle } = generatePuzzle('medium', seed)
+      const board = createBoardFromPuzzle(puzzle)
+      return {
+        board,
+        solution,
+        difficulty: 'medium',
         selectedCell: null,
         isComplete: false,
         isPaused: false,

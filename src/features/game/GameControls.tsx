@@ -1,10 +1,11 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { useGame } from './useGame'
 import { useStats } from './useStats'
 import { useSound } from '../sound/useSound'
 import { Timer } from './Timer'
 import { formatTime } from './utils'
 import type { Difficulty } from '../../types'
+import { isDailyCompleted, markDailyCompleted, loadDailyState } from './dailyChallenge'
 import styles from './GameControls.module.css'
 
 export function GameControls() {
@@ -31,6 +32,9 @@ export function GameControls() {
   const playRef = useRef(play)
   useEffect(() => { playRef.current = play }, [play])
 
+  const [dailyCompleted, setDailyCompleted] = useState(() => isDailyCompleted())
+  const refreshDaily = useCallback(() => setDailyCompleted(isDailyCompleted()), [])
+
   useEffect(() => {
     // Reset tracking on new game (elapsedTime resets to 0 while not complete)
     if (elapsedTime === 0 && !isComplete) {
@@ -41,6 +45,13 @@ export function GameControls() {
       recordWin(difficulty, elapsedTime)
       playRef.current('complete')
       prevIsCompleteRef.current = true
+
+      // Mark daily challenge complete if this was a daily game
+      const dailyState = loadDailyState()
+      if (dailyState.date === new Date().toISOString().slice(0, 10) && !dailyState.completed) {
+        markDailyCompleted(elapsedTime)
+        queueMicrotask(() => setDailyCompleted(true))
+      }
     }
   }, [isComplete, elapsedTime, difficulty, recordWin])
 
@@ -67,18 +78,35 @@ export function GameControls() {
 
         <Timer />
 
-        <button
-          className={styles.buttonPrimary}
-          type="button"
-          onClick={() => {
-            if (!isComplete) {
-              resetStreak()
-            }
-            dispatch({ type: 'NEW_GAME', difficulty })
-          }}
-        >
-          新游戏
-        </button>
+        <div className={styles.topRight}>
+          <button
+            className={styles.dailyButton}
+            type="button"
+            onClick={() => {
+              if (!isComplete) {
+                resetStreak()
+              }
+              dispatch({ type: 'NEW_DAILY_CHALLENGE' })
+              refreshDaily()
+            }}
+            aria-label="每日挑战"
+            title="每日挑战"
+          >
+            📅
+          </button>
+          <button
+            className={styles.buttonPrimary}
+            type="button"
+            onClick={() => {
+              if (!isComplete) {
+                resetStreak()
+              }
+              dispatch({ type: 'NEW_GAME', difficulty })
+            }}
+          >
+            新游戏
+          </button>
+        </div>
       </div>
 
       <div className={styles.actionRow}>
@@ -162,6 +190,12 @@ export function GameControls() {
       {isComplete && (
         <span className={styles.completed} role="status" aria-live="polite">
           恭喜完成！用时：{formatTime(elapsedTime)}
+        </span>
+      )}
+
+      {dailyCompleted && (
+        <span className={styles.dailyBadge} role="status" aria-live="polite">
+          ✅ 今日每日挑战已完成
         </span>
       )}
 
