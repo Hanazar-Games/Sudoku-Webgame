@@ -64,6 +64,17 @@ describe('Sudoku Engine', () => {
       const val = grid[4][4]
       expect(isValidPlacement(grid, 4, 4, val!)).toBe(true)
     })
+
+    it('returns false for empty board in isBoardComplete', () => {
+      const empty = Array.from({ length: 9 }, () => Array(9).fill(null))
+      expect(isBoardComplete(empty)).toBe(false)
+    })
+
+    it('returns false for full but invalid board in isBoardComplete', () => {
+      const grid = generateFullGrid()
+      grid[0][1] = grid[0][0]
+      expect(isBoardComplete(grid)).toBe(false)
+    })
   })
 
   describe('solver', () => {

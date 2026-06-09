@@ -402,5 +402,37 @@ describe('gameReducer', () => {
       // Solution should be re-derived
       expect(loaded.solution.length).toBe(9)
     })
+
+    it('falls back to new game when saved board has conflicting fixed cells', () => {
+      const state = createInitialState('easy')
+      // Create a board with two identical fixed values in the same row
+      const corruptedBoard = state.board.map((row, r) =>
+        row.map((cell, c) => {
+          if (r === 0 && c === 0) return { ...cell, isFixed: true, value: 5 }
+          if (r === 0 && c === 1) return { ...cell, isFixed: true, value: 5 }
+          return cell
+        })
+      )
+      const corrupted = { ...state, board: corruptedBoard }
+      const loaded = gameReducer(state, { type: 'LOAD_STATE', state: corrupted })
+      // Should create a fresh board instead of loading corrupted one
+      expect(loaded.board).not.toEqual(corruptedBoard)
+    })
+  })
+
+  describe('moveHistory cap', () => {
+    it('truncates history to a maximum of 500 entries', () => {
+      const state = createInitialState('easy')
+      const { row, col } = getEditableCell(state)
+      const selected = gameReducer(state, { type: 'SELECT_CELL', row, col })
+
+      let current = selected
+      for (let i = 0; i < 502; i++) {
+        current = gameReducer(current, { type: 'SET_VALUE', value: (i % 9) + 1 })
+      }
+
+      expect(current.moveHistory.length).toBe(500)
+      expect(current.historyIndex).toBe(499)
+    })
   })
 })
