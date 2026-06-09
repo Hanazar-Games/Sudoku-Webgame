@@ -91,7 +91,8 @@ test.describe('Sudoku Game', () => {
     await expect(filledCell).toHaveText('5')
 
     await page.getByRole('button', { name: '新游戏' }).click()
-    await expect(filledCell).toHaveText('')
+    // New puzzle may place a fixed number at this cell; verify the old user input is gone
+    await expect(filledCell).not.toHaveText('5')
   })
 
   test('note mode toggle changes button state', async ({ page }) => {

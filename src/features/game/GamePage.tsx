@@ -2,6 +2,7 @@ import { Board } from './Board'
 import { GameControls } from './GameControls'
 import { GameProvider } from './GameProvider'
 import { Onboarding } from './Onboarding'
+import { Celebration } from './Celebration'
 import { useGame } from './useGame'
 import { useTheme } from '../theme/useTheme'
 import { useSound } from '../sound/useSound'
@@ -54,6 +55,8 @@ function GameContent() {
       <p className={styles.status}>
         点击或按方向键选中格子，使用键盘或下方数字键填数，方向键移动，ESC 暂停/继续。
       </p>
+
+      <Celebration active={state.isComplete} />
 
       <GameControls />
     </main>
