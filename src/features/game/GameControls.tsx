@@ -19,6 +19,7 @@ export function GameControls() {
     historyIndex,
     moveHistory,
     elapsedTime,
+    errorCount,
   } = state
 
   const canUndo = historyIndex > 0
@@ -182,6 +183,12 @@ export function GameControls() {
         <span className={styles.statItem}>
           <span className={styles.statLabel}>最佳连胜</span>
           <span className={styles.statValue}>{stats.bestStreak}</span>
+        </span>
+        <span className={styles.statItem}>
+          <span className={styles.statLabel}>错误次数</span>
+          <span className={`${styles.statValue} ${errorCount > 0 ? styles.statError : ''}`}>
+            {errorCount}
+          </span>
         </span>
       </div>
     </div>

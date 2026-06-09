@@ -13,6 +13,7 @@ export interface GameState {
   isNoteMode: boolean
   moveHistory: Cell[][][]
   historyIndex: number
+  errorCount: number
 }
 
 export type GameAction =
@@ -72,6 +73,7 @@ export function createInitialState(difficulty: Difficulty = 'medium'): GameState
     isNoteMode: false,
     moveHistory: buildInitialHistory(board),
     historyIndex: 0,
+    errorCount: 0,
   }
 }
 
@@ -115,6 +117,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         isNoteMode: false,
         moveHistory: buildInitialHistory(board),
         historyIndex: 0,
+        errorCount: 0,
       }
     }
 
@@ -170,8 +173,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       newBoard[row][col].value = action.value
       newBoard[row][col].candidates = []
       const isComplete = isBoardComplete(newBoard.map((r) => r.map((c) => c.value)))
+      const isCorrect = action.value === state.solution[row][col]
 
-      return pushHistory(state, newBoard, isComplete)
+      return {
+        ...pushHistory(state, newBoard, isComplete),
+        errorCount: state.errorCount + (isCorrect ? 0 : 1),
+      }
     }
 
     case 'CLEAR_VALUE': {
@@ -266,6 +273,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         board: cloneBoard(state.moveHistory[newIndex]),
         historyIndex: newIndex,
         isComplete: false,
+        errorCount: state.errorCount,
       }
     }
 

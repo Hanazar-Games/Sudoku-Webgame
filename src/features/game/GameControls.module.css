@@ -225,6 +225,10 @@
   font-variant-numeric: tabular-nums;
 }
 
+.statError {
+  color: var(--color-danger);
+}
+
 .newRecord {
   display: inline-block;
   margin-left: var(--space-xs);

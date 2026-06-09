@@ -54,6 +54,7 @@ function loadSavedState(): GameState | null {
       isNoteMode: parsed.isNoteMode ?? false,
       moveHistory: [board],
       historyIndex: 0,
+      errorCount: parsed.errorCount ?? 0,
     }
   } catch {
     return null
