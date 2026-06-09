@@ -52,7 +52,12 @@ function GameContent() {
 
       <Onboarding />
 
-      <p className={styles.status}>
+      <p id="board-instructions" className={styles.visuallyHidden}>
+        数独棋盘共 9 行 9 列。使用方向键在格子间移动焦点，数字键 1 到 9 填入数值，退格键清除。
+        按 ESC 暂停或继续游戏。
+      </p>
+
+      <p className={styles.status} aria-hidden="true">
         点击或按方向键选中格子，使用键盘或下方数字键填数，方向键移动，ESC 暂停/继续。
       </p>
 

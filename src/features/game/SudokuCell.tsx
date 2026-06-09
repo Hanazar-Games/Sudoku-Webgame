@@ -53,7 +53,7 @@ export const SudokuCell = memo(function SudokuCell({
           onSelect(row, col)
         }
       }}
-      aria-label={`第 ${row + 1} 行，第 ${col + 1} 列${value ? `，数值 ${value}` : '，空白'}`}
+      aria-label={`第 ${row + 1} 行，第 ${col + 1} 列${value !== null ? `，数值 ${value}` : '，空白'}${isFixed ? '，固定' : '，可编辑'}${candidates.length > 0 ? `，候选数 ${candidates.join('、')}` : ''}`}
       aria-pressed={isSelected}
     >
       {value !== null ? (

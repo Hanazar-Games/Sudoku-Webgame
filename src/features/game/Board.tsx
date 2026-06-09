@@ -4,6 +4,13 @@ import { useSound } from '../sound/useSound'
 import { SudokuCell } from './SudokuCell'
 import styles from './Board.module.css'
 
+function focusCell(row: number, col: number) {
+  const el = document.querySelector<HTMLElement>(`[data-testid="cell-${row}-${col}"]`)
+  if (el && document.activeElement !== el) {
+    el.focus({ preventScroll: true })
+  }
+}
+
 export function Board() {
   const { state, dispatch } = useGame()
   const { play } = useSound()
@@ -105,6 +112,12 @@ export function Board() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [dispatch, isPaused])
 
+  // Focus management: move focus to selected cell on keyboard navigation
+  useEffect(() => {
+    if (isPaused || !selectedCell) return
+    focusCell(selectedCell.row, selectedCell.col)
+  }, [selectedCell, isPaused])
+
   const selectedValue = selectedCell
     ? board[selectedCell.row][selectedCell.col].value
     : null
@@ -114,6 +127,7 @@ export function Board() {
       className={styles.board}
       role="grid"
       aria-label="数独棋盘"
+      aria-describedby="board-instructions"
       inert={isPaused || undefined}
     >
       {board.map((row) =>
