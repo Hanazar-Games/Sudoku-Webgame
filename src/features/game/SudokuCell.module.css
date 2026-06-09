@@ -116,6 +116,11 @@
 
 /* 移动端粗边框微调 */
 @media (max-width: 480px) {
+  .cell {
+    min-width: 0;
+    min-height: 0;
+  }
+
   .borderRightThick {
     border-right-width: 1.5px;
   }

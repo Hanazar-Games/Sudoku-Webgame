@@ -14,7 +14,7 @@ function GameContent() {
         <h1 className={styles.title}>Sudoku</h1>
       </header>
 
-      <div className={styles.boardWrapper} inert={isPaused || undefined}>
+      <div className={styles.boardWrapper}>
         <Board />
         {isPaused && (
           <div className={styles.pauseOverlay} role="dialog" aria-modal="true" aria-label="游戏已暂停">

@@ -25,6 +25,7 @@ export function GameControls() {
         <select
           className={styles.select}
           value={difficulty}
+          disabled={isPaused}
           onChange={(e) => {
             const value = e.target.value
             const validDifficulties: readonly string[] = ['easy', 'medium', 'hard']

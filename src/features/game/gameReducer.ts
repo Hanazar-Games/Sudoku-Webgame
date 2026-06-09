@@ -50,7 +50,7 @@ function cloneBoard(board: Cell[][]): Cell[][] {
   return board.map((row) => row.map((cell) => ({ ...cell, candidates: [...cell.candidates] })))
 }
 
-function extractPuzzleFromBoard(board: Cell[][]): SudokuGrid {
+export function extractPuzzleFromBoard(board: Cell[][]): SudokuGrid {
   return board.map((row) => row.map((cell) => (cell.isFixed ? cell.value : null)))
 }
 

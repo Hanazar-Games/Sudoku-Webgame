@@ -1,15 +1,11 @@
 import { useReducer, useEffect, useRef, type ReactNode } from 'react'
 import { GameContext } from './GameContext'
-import { gameReducer, createInitialState } from './gameReducer'
+import { gameReducer, createInitialState, extractPuzzleFromBoard } from './gameReducer'
 import type { GameState } from './gameReducer'
 import type { Cell } from '../../types'
 import { solve } from '../../lib/sudoku'
 
 const SAVE_KEY = 'sudoku-game-save-v1'
-
-function extractPuzzle(board: GameState['board']): GameState['solution'] {
-  return board.map((row) => row.map((cell) => (cell.isFixed ? cell.value : null)))
-}
 
 function isValidBoard(board: unknown): board is Cell[][] {
   if (!Array.isArray(board) || board.length !== 9) return false
@@ -33,20 +29,31 @@ function loadSavedState(): GameState | null {
   try {
     const raw = localStorage.getItem(SAVE_KEY)
     if (!raw) return null
-    const parsed = JSON.parse(raw) as Omit<GameState, 'solution'>
+    const parsed = JSON.parse(raw) as Partial<Omit<GameState, 'solution'>>
     if (!isValidBoard(parsed.board)) return null
     if (!parsed.difficulty) return null
 
     // Re-derive solution from fixed cells
-    const puzzle = extractPuzzle(parsed.board)
+    const puzzle = extractPuzzleFromBoard(parsed.board)
     const solution = solve(puzzle)
     if (!solution) return null
 
+    // Clone board to ensure moveHistory has its own reference
+    const board = parsed.board.map((row) =>
+      row.map((cell) => ({ ...cell, candidates: [...cell.candidates] }))
+    )
+
     return {
-      ...parsed,
+      board,
       solution,
+      difficulty: parsed.difficulty,
       selectedCell: null,
+      isComplete: parsed.isComplete ?? false,
       isPaused: false,
+      elapsedTime: parsed.elapsedTime ?? 0,
+      isNoteMode: parsed.isNoteMode ?? false,
+      moveHistory: [board],
+      historyIndex: 0,
     }
   } catch {
     return null
@@ -55,10 +62,15 @@ function loadSavedState(): GameState | null {
 
 function saveState(state: GameState) {
   try {
-    // Exclude solution from storage to prevent cheating
+    // Exclude solution (anti-cheat), moveHistory (quota), and historyIndex (rebuilt on load)
     localStorage.setItem(
       SAVE_KEY,
-      JSON.stringify(state, (key, value) => (key === 'solution' ? undefined : value))
+      JSON.stringify(state, (key, value) => {
+        if (key === 'solution' || key === 'moveHistory' || key === 'historyIndex') {
+          return undefined
+        }
+        return value
+      })
     )
   } catch {
     // Ignore quota exceeded or private mode errors
@@ -94,8 +106,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
       isComplete: state.isComplete,
       isNoteMode: state.isNoteMode,
       selectedCell: state.selectedCell,
-      historyIndex: state.historyIndex,
-      moveHistoryLength: state.moveHistory.length,
     })
 
     if (prevSaveKeyRef.current === saveKey) {

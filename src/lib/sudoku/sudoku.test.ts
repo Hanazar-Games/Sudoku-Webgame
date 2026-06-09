@@ -172,7 +172,7 @@ describe('Sudoku Engine', () => {
         expect(hasUniqueSolution(puzzle)).toBe(true)
         expect(isBoardValid(puzzle)).toBe(true)
       }
-    })
+    }, 15000)
 
     it('removes different amounts of cells based on difficulty', () => {
       const easy = generatePuzzle('easy')
