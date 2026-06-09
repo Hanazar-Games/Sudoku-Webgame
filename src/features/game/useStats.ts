@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
 import type { Difficulty } from '../../types'
-import { loadStats, recordWin as recordWinImpl, type GameStats } from './stats'
+import { loadStats, recordWin as recordWinImpl, resetStreak as resetStreakImpl, type GameStats } from './stats'
 
 export function useStats() {
   const [stats, setStats] = useState<GameStats>(() => loadStats())
@@ -9,5 +9,9 @@ export function useStats() {
     setStats((prev) => recordWinImpl(prev, difficulty, time))
   }, [])
 
-  return { stats, recordWin }
+  const resetStreak = useCallback(() => {
+    setStats((prev) => resetStreakImpl(prev))
+  }, [])
+
+  return { stats, recordWin, resetStreak }
 }

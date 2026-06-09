@@ -8,7 +8,7 @@ import styles from './GameControls.module.css'
 
 export function GameControls() {
   const { state, dispatch } = useGame()
-  const { stats, recordWin } = useStats()
+  const { stats, recordWin, resetStreak } = useStats()
   const {
     difficulty,
     isComplete,
@@ -64,7 +64,12 @@ export function GameControls() {
         <button
           className={styles.buttonPrimary}
           type="button"
-          onClick={() => dispatch({ type: 'NEW_GAME', difficulty })}
+          onClick={() => {
+            if (!isComplete) {
+              resetStreak()
+            }
+            dispatch({ type: 'NEW_GAME', difficulty })
+          }}
         >
           新游戏
         </button>
@@ -164,6 +169,14 @@ export function GameControls() {
           <span className={styles.statValue}>
             {diffStats.bestTime !== null ? formatTime(diffStats.bestTime) : '--:--'}
           </span>
+        </span>
+        <span className={styles.statItem}>
+          <span className={styles.statLabel}>连胜</span>
+          <span className={styles.statValue}>{stats.currentStreak}</span>
+        </span>
+        <span className={styles.statItem}>
+          <span className={styles.statLabel}>最佳连胜</span>
+          <span className={styles.statValue}>{stats.bestStreak}</span>
         </span>
       </div>
     </div>
