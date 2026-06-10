@@ -19,20 +19,22 @@ export function Board() {
   const boardRef = useRef(board)
   const selectedCellRef = useRef(selectedCell)
   const playRef = useRef(play)
+  const isPausedRef = useRef(isPaused)
 
   useEffect(() => { boardRef.current = board }, [board])
   useEffect(() => { selectedCellRef.current = selectedCell }, [selectedCell])
   useEffect(() => { playRef.current = play }, [play])
+  useEffect(() => { isPausedRef.current = isPaused }, [isPaused])
 
   const handleSelectCell = useCallback(
     (row: number, col: number) => {
-      if (isPaused) return
+      if (isPausedRef.current) return
       dispatch({ type: 'SELECT_CELL', row, col })
     },
-    [dispatch, isPaused]
+    [dispatch]
   )
 
-  // 键盘输入处理
+  // 键盘输入处理（只绑定一次，通过 ref 读取最新状态避免频繁重建）
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       // 避免拦截表单元素内的键盘事件
@@ -61,7 +63,7 @@ export function Board() {
         return
       }
 
-      if (isPaused) return
+      if (isPausedRef.current) return
 
       const currentSelected = selectedCellRef.current
       const currentBoard = boardRef.current
@@ -110,7 +112,7 @@ export function Board() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [dispatch, isPaused])
+  }, [dispatch])
 
   // Focus management: move focus to selected cell on keyboard navigation
   useEffect(() => {

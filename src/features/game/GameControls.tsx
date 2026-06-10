@@ -30,30 +30,37 @@ export function GameControls() {
   // Detect game completion and record stats (once per game)
   const prevIsCompleteRef = useRef(isComplete)
   const playRef = useRef(play)
+  const elapsedTimeRef = useRef(elapsedTime)
+  const difficultyRef = useRef(difficulty)
+  const recordWinRef = useRef(recordWin)
+
   useEffect(() => { playRef.current = play }, [play])
+  useEffect(() => { elapsedTimeRef.current = elapsedTime }, [elapsedTime])
+  useEffect(() => { difficultyRef.current = difficulty }, [difficulty])
+  useEffect(() => { recordWinRef.current = recordWin }, [recordWin])
 
   const [dailyCompleted, setDailyCompleted] = useState(() => isDailyCompleted())
   const refreshDaily = useCallback(() => setDailyCompleted(isDailyCompleted()), [])
 
   useEffect(() => {
     // Reset tracking on new game (elapsedTime resets to 0 while not complete)
-    if (elapsedTime === 0 && !isComplete) {
+    if (elapsedTimeRef.current === 0 && !isComplete) {
       prevIsCompleteRef.current = false
     }
 
     if (!prevIsCompleteRef.current && isComplete) {
-      recordWin(difficulty, elapsedTime)
+      recordWinRef.current(difficultyRef.current, elapsedTimeRef.current)
       playRef.current('complete')
       prevIsCompleteRef.current = true
 
       // Mark daily challenge complete if this was a daily game
       const dailyState = loadDailyState()
       if (dailyState.date === new Date().toISOString().slice(0, 10) && !dailyState.completed) {
-        markDailyCompleted(elapsedTime)
+        markDailyCompleted(elapsedTimeRef.current)
         queueMicrotask(() => setDailyCompleted(true))
       }
     }
-  }, [isComplete, elapsedTime, difficulty, recordWin])
+  }, [isComplete])
 
   return (
     <div className={styles.controls}>

@@ -60,6 +60,19 @@ function buildInitialHistory(board: Cell[][]): Cell[][][] {
   return [cloneBoard(board)]
 }
 
+function countErrors(board: Cell[][], solution: SudokuGrid): number {
+  let count = 0
+  for (let r = 0; r < 9; r++) {
+    for (let c = 0; c < 9; c++) {
+      const cell = board[r][c]
+      if (!cell.isFixed && cell.value !== null && cell.value !== solution[r][c]) {
+        count++
+      }
+    }
+  }
+  return count
+}
+
 export function createInitialState(difficulty: Difficulty = 'medium'): GameState {
   const { solution, puzzle } = generatePuzzle(difficulty)
   const board = createBoardFromPuzzle(puzzle)
@@ -296,12 +309,13 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'UNDO': {
       if (state.historyIndex <= 0) return state
       const newIndex = state.historyIndex - 1
+      const newBoard = cloneBoard(state.moveHistory[newIndex])
       return {
         ...state,
-        board: cloneBoard(state.moveHistory[newIndex]),
+        board: newBoard,
         historyIndex: newIndex,
         isComplete: false,
-        errorCount: state.errorCount,
+        errorCount: countErrors(newBoard, state.solution),
       }
     }
 
@@ -315,6 +329,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         board: newBoard,
         historyIndex: newIndex,
         isComplete,
+        errorCount: countErrors(newBoard, state.solution),
       }
     }
 
