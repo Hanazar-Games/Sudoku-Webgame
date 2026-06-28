@@ -5,7 +5,7 @@ import { useSound } from '../sound/useSound'
 import { Timer } from './Timer'
 import { formatTime } from './utils'
 import type { Difficulty } from '../../types'
-import { isDailyCompleted, markDailyCompleted, loadDailyState } from './dailyChallenge'
+import { isDailyCompleted, markDailyCompleted } from './dailyChallenge'
 import styles from './GameControls.module.css'
 
 export function GameControls() {
@@ -21,6 +21,7 @@ export function GameControls() {
     moveHistory,
     elapsedTime,
     errorCount,
+    isDailyChallenge,
   } = state
 
   const canUndo = historyIndex > 0
@@ -33,11 +34,13 @@ export function GameControls() {
   const elapsedTimeRef = useRef(elapsedTime)
   const difficultyRef = useRef(difficulty)
   const recordWinRef = useRef(recordWin)
+  const isDailyChallengeRef = useRef(isDailyChallenge)
 
   useEffect(() => { playRef.current = play }, [play])
   useEffect(() => { elapsedTimeRef.current = elapsedTime }, [elapsedTime])
   useEffect(() => { difficultyRef.current = difficulty }, [difficulty])
   useEffect(() => { recordWinRef.current = recordWin }, [recordWin])
+  useEffect(() => { isDailyChallengeRef.current = isDailyChallenge }, [isDailyChallenge])
 
   const [dailyCompleted, setDailyCompleted] = useState(() => isDailyCompleted())
   const refreshDaily = useCallback(() => setDailyCompleted(isDailyCompleted()), [])
@@ -53,9 +56,7 @@ export function GameControls() {
       playRef.current('complete')
       prevIsCompleteRef.current = true
 
-      // Mark daily challenge complete if this was a daily game
-      const dailyState = loadDailyState()
-      if (dailyState.date === new Date().toISOString().slice(0, 10) && !dailyState.completed) {
+      if (isDailyChallengeRef.current && !isDailyCompleted()) {
         markDailyCompleted(elapsedTimeRef.current)
         queueMicrotask(() => setDailyCompleted(true))
       }
@@ -73,7 +74,10 @@ export function GameControls() {
             const value = e.target.value
             const validDifficulties: readonly string[] = ['easy', 'medium', 'hard']
             if (validDifficulties.includes(value)) {
-              dispatch({ type: 'CHANGE_DIFFICULTY', difficulty: value as Difficulty })
+              if (!isComplete) {
+                resetStreak()
+              }
+              dispatch({ type: 'NEW_GAME', difficulty: value as Difficulty })
             }
           }}
           aria-label="难度"

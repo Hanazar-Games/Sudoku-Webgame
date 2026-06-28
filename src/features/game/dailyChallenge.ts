@@ -9,7 +9,7 @@ export interface DailyState {
   difficulty: Difficulty
 }
 
-function getTodayString(): string {
+export function getTodayString(): string {
   const now = new Date()
   const y = now.getFullYear()
   const m = String(now.getMonth() + 1).padStart(2, '0')

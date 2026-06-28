@@ -52,6 +52,7 @@ function loadSavedState(): GameState | null {
       isPaused: false,
       elapsedTime: parsed.elapsedTime ?? 0,
       isNoteMode: parsed.isNoteMode ?? false,
+      isDailyChallenge: parsed.isDailyChallenge ?? false,
       moveHistory: [board],
       historyIndex: 0,
       errorCount: parsed.errorCount ?? 0,
@@ -87,7 +88,11 @@ function initState(): GameState {
 export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, undefined, initState)
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const prevSaveKeyRef = useRef<string>('')
+  const latestStateRef = useRef(state)
+
+  useEffect(() => {
+    latestStateRef.current = state
+  }, [state])
 
   // Timer
   useEffect(() => {
@@ -98,35 +103,30 @@ export function GameProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(id)
   }, [state.isPaused, state.isComplete])
 
-  // Auto-save with debounce (3s) to reduce localStorage writes
-  // Exclude elapsedTime to avoid resetting the debounce timer every second
+  // Auto-save with debounce (3s) to reduce localStorage writes.
+  // Keep elapsedTime out of the dependency list so timer ticks do not cancel a pending save.
   useEffect(() => {
-    const saveKey = JSON.stringify({
-      board: state.board,
-      difficulty: state.difficulty,
-      isComplete: state.isComplete,
-      isNoteMode: state.isNoteMode,
-      selectedCell: state.selectedCell,
-    })
-
-    if (prevSaveKeyRef.current === saveKey) {
-      // Only elapsedTime changed (TICK); keep existing debounce timer
-      return
-    }
-    prevSaveKeyRef.current = saveKey
-
     if (saveTimerRef.current) {
       clearTimeout(saveTimerRef.current)
     }
     saveTimerRef.current = setTimeout(() => {
-      saveState(state)
+      saveState(latestStateRef.current)
+      saveTimerRef.current = null
     }, 3000)
+
     return () => {
       if (saveTimerRef.current) {
         clearTimeout(saveTimerRef.current)
       }
     }
-  }, [state])
+  }, [
+    state.board,
+    state.difficulty,
+    state.errorCount,
+    state.isComplete,
+    state.isDailyChallenge,
+    state.isNoteMode,
+  ])
 
   return (
     <GameContext.Provider value={{ state, dispatch }}>

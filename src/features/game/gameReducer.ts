@@ -1,6 +1,7 @@
 import type { Cell, Difficulty } from '../../types'
 import { generatePuzzle, isBoardComplete, solve } from '../../lib/sudoku'
 import type { SudokuGrid } from '../../lib/sudoku'
+import { getDailySeed } from './dailyChallenge'
 
 export interface GameState {
   board: Cell[][]
@@ -11,6 +12,7 @@ export interface GameState {
   isPaused: boolean
   elapsedTime: number
   isNoteMode: boolean
+  isDailyChallenge: boolean
   moveHistory: Cell[][][]
   historyIndex: number
   errorCount: number
@@ -85,6 +87,7 @@ export function createInitialState(difficulty: Difficulty = 'medium'): GameState
     isPaused: false,
     elapsedTime: 0,
     isNoteMode: false,
+    isDailyChallenge: false,
     moveHistory: buildInitialHistory(board),
     historyIndex: 0,
     errorCount: 0,
@@ -129,6 +132,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         isPaused: false,
         elapsedTime: 0,
         isNoteMode: false,
+        isDailyChallenge: false,
         moveHistory: buildInitialHistory(board),
         historyIndex: 0,
         errorCount: 0,
@@ -136,16 +140,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'NEW_DAILY_CHALLENGE': {
-      const seed = (() => {
-        const today = new Date()
-        const str = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`
-        let h = 0
-        for (let i = 0; i < str.length; i++) {
-          h = ((h << 5) - h + str.charCodeAt(i)) | 0
-        }
-        return Math.abs(h) || 1
-      })()
-      const { solution, puzzle } = generatePuzzle('medium', seed)
+      const { solution, puzzle } = generatePuzzle('medium', getDailySeed())
       const board = createBoardFromPuzzle(puzzle)
       return {
         board,
@@ -156,6 +151,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         isPaused: false,
         elapsedTime: 0,
         isNoteMode: false,
+        isDailyChallenge: true,
         moveHistory: buildInitialHistory(board),
         historyIndex: 0,
         errorCount: 0,
@@ -176,6 +172,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         solution,
         selectedCell: null,
         isPaused: false,
+        isDailyChallenge: saved.isDailyChallenge ?? false,
       }
     }
 

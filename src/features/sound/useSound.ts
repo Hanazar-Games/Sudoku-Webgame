@@ -1,8 +1,10 @@
-import { useRef, useCallback, useState } from 'react'
+import { useRef, useCallback, useEffect, useState } from 'react'
 
 export type SoundType = 'fill' | 'clear' | 'error' | 'hint' | 'complete' | 'toggle'
 
 const SOUND_KEY = 'sudoku-sound-enabled'
+const soundSubscribers = new Set<(enabled: boolean) => void>()
+let cachedEnabled: boolean | null = null
 
 function createAudioContext(): AudioContext | null {
   try {
@@ -75,25 +77,40 @@ function playSoundEffect(ctx: AudioContext, type: SoundType): void {
 }
 
 function getInitialEnabled(): boolean {
+  if (cachedEnabled !== null) return cachedEnabled
+
   try {
     const raw = localStorage.getItem(SOUND_KEY)
-    return raw !== 'false'
+    cachedEnabled = raw !== 'false'
   } catch {
-    return true
+    cachedEnabled = true
   }
+
+  return cachedEnabled
 }
 
-function saveEnabled(enabled: boolean): void {
+function setGlobalEnabled(enabled: boolean): void {
+  cachedEnabled = enabled
   try {
     localStorage.setItem(SOUND_KEY, String(enabled))
   } catch {
     // Ignore
+  }
+  soundSubscribers.forEach((subscriber) => subscriber(enabled))
+}
+
+function subscribeToSoundEnabled(subscriber: (enabled: boolean) => void): () => void {
+  soundSubscribers.add(subscriber)
+  return () => {
+    soundSubscribers.delete(subscriber)
   }
 }
 
 export function useSound() {
   const [enabled, setEnabled] = useState(() => getInitialEnabled())
   const ctxRef = useRef<AudioContext | null>(null)
+
+  useEffect(() => subscribeToSoundEnabled(setEnabled), [])
 
   const play = useCallback(
     (type: SoundType) => {
@@ -114,11 +131,7 @@ export function useSound() {
   )
 
   const toggle = useCallback(() => {
-    setEnabled((prev) => {
-      const next = !prev
-      saveEnabled(next)
-      return next
-    })
+    setGlobalEnabled(!getInitialEnabled())
   }, [])
 
   return { enabled, play, toggle }

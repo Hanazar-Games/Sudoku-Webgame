@@ -370,8 +370,23 @@ describe('gameReducer', () => {
       expect(next.isPaused).toBe(false)
       expect(next.elapsedTime).toBe(0)
       expect(next.isNoteMode).toBe(false)
+      expect(next.isDailyChallenge).toBe(false)
       expect(next.moveHistory.length).toBe(1)
       expect(next.historyIndex).toBe(0)
+    })
+  })
+
+  describe('NEW_DAILY_CHALLENGE', () => {
+    it('marks the game as a daily challenge', () => {
+      const state = createInitialState('easy')
+      const next = gameReducer(state, { type: 'NEW_DAILY_CHALLENGE' })
+
+      expect(next.difficulty).toBe('medium')
+      expect(next.isDailyChallenge).toBe(true)
+      expect(next.selectedCell).toBeNull()
+      expect(next.isComplete).toBe(false)
+      expect(next.elapsedTime).toBe(0)
+      expect(next.moveHistory.length).toBe(1)
     })
   })
 
