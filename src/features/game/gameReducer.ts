@@ -1,7 +1,7 @@
 import type { Cell, Difficulty } from '../../types'
 import { generatePuzzle, isBoardComplete, solve } from '../../lib/sudoku'
 import type { SudokuGrid } from '../../lib/sudoku'
-import { getDailySeed } from './dailyChallenge'
+import { getDailySeed, getTodayString } from './dailyChallenge'
 
 export interface GameState {
   board: Cell[][]
@@ -13,6 +13,7 @@ export interface GameState {
   elapsedTime: number
   isNoteMode: boolean
   isDailyChallenge: boolean
+  dailyChallengeDate: string | null
   moveHistory: Cell[][][]
   historyIndex: number
   errorCount: number
@@ -88,6 +89,7 @@ export function createInitialState(difficulty: Difficulty = 'medium'): GameState
     elapsedTime: 0,
     isNoteMode: false,
     isDailyChallenge: false,
+    dailyChallengeDate: null,
     moveHistory: buildInitialHistory(board),
     historyIndex: 0,
     errorCount: 0,
@@ -133,6 +135,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         elapsedTime: 0,
         isNoteMode: false,
         isDailyChallenge: false,
+        dailyChallengeDate: null,
         moveHistory: buildInitialHistory(board),
         historyIndex: 0,
         errorCount: 0,
@@ -152,6 +155,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         elapsedTime: 0,
         isNoteMode: false,
         isDailyChallenge: true,
+        dailyChallengeDate: getTodayString(),
         moveHistory: buildInitialHistory(board),
         historyIndex: 0,
         errorCount: 0,
@@ -173,6 +177,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         selectedCell: null,
         isPaused: false,
         isDailyChallenge: saved.isDailyChallenge ?? false,
+        dailyChallengeDate: saved.dailyChallengeDate ?? null,
       }
     }
 

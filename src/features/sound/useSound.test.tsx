@@ -1,6 +1,36 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
 import { useSound } from './useSound'
+
+const oscillatorStarts: number[] = []
+
+class MockGain {
+  gain = {
+    exponentialRampToValueAtTime: vi.fn(),
+    linearRampToValueAtTime: vi.fn(),
+    setValueAtTime: vi.fn(),
+  }
+  connect = vi.fn()
+}
+
+class MockOscillator {
+  frequency = { value: 0 }
+  type: OscillatorType = 'sine'
+  connect = vi.fn()
+  start = vi.fn((time?: number) => {
+    oscillatorStarts.push(time ?? 0)
+  })
+  stop = vi.fn()
+}
+
+class MockAudioContext {
+  currentTime = 10
+  destination = {}
+  state: AudioContextState = 'running'
+  createGain = vi.fn(() => new MockGain())
+  createOscillator = vi.fn(() => new MockOscillator())
+  resume = vi.fn(() => Promise.resolve())
+}
 
 function SoundHarness() {
   const first = useSound()
@@ -11,8 +41,16 @@ function SoundHarness() {
       <button type="button" onClick={first.toggle}>
         Toggle first
       </button>
+      <button type="button" onClick={first.toggleMusic}>
+        Toggle music
+      </button>
+      <button type="button" onClick={() => first.play('complete')}>
+        Play complete
+      </button>
       <span data-testid="first">{first.enabled ? 'on' : 'off'}</span>
       <span data-testid="second">{second.enabled ? 'on' : 'off'}</span>
+      <span data-testid="first-music">{first.musicEnabled ? 'on' : 'off'}</span>
+      <span data-testid="second-music">{second.musicEnabled ? 'on' : 'off'}</span>
     </>
   )
 }
@@ -20,13 +58,35 @@ function SoundHarness() {
 describe('useSound', () => {
   beforeEach(() => {
     localStorage.clear()
+    oscillatorStarts.length = 0
+    vi.stubGlobal('AudioContext', MockAudioContext)
   })
 
-  it('keeps multiple hook instances in sync', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals()
+  })
+
+  it('keeps multiple hook instances in sync and schedules clean audio cues', () => {
     render(<SoundHarness />)
 
     expect(screen.getByTestId('first')).toHaveTextContent('on')
     expect(screen.getByTestId('second')).toHaveTextContent('on')
+    expect(screen.getByTestId('first-music')).toHaveTextContent('off')
+    expect(screen.getByTestId('second-music')).toHaveTextContent('off')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Play complete' }))
+
+    expect(oscillatorStarts).toEqual([10, 10.08, 10.16, 10.24])
+
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle music' }))
+
+    expect(screen.getByTestId('first-music')).toHaveTextContent('on')
+    expect(screen.getByTestId('second-music')).toHaveTextContent('on')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle music' }))
+
+    expect(screen.getByTestId('first-music')).toHaveTextContent('off')
+    expect(screen.getByTestId('second-music')).toHaveTextContent('off')
 
     fireEvent.click(screen.getByRole('button', { name: 'Toggle first' }))
 

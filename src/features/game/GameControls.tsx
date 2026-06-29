@@ -5,7 +5,7 @@ import { useSound } from '../sound/useSound'
 import { Timer } from './Timer'
 import { formatTime } from './utils'
 import type { Difficulty } from '../../types'
-import { isDailyCompleted, markDailyCompleted } from './dailyChallenge'
+import { getTodayString, isDailyCompleted, markDailyCompleted } from './dailyChallenge'
 import styles from './GameControls.module.css'
 
 export function GameControls() {
@@ -22,6 +22,7 @@ export function GameControls() {
     elapsedTime,
     errorCount,
     isDailyChallenge,
+    dailyChallengeDate,
   } = state
 
   const canUndo = historyIndex > 0
@@ -35,12 +36,14 @@ export function GameControls() {
   const difficultyRef = useRef(difficulty)
   const recordWinRef = useRef(recordWin)
   const isDailyChallengeRef = useRef(isDailyChallenge)
+  const dailyChallengeDateRef = useRef(dailyChallengeDate)
 
   useEffect(() => { playRef.current = play }, [play])
   useEffect(() => { elapsedTimeRef.current = elapsedTime }, [elapsedTime])
   useEffect(() => { difficultyRef.current = difficulty }, [difficulty])
   useEffect(() => { recordWinRef.current = recordWin }, [recordWin])
   useEffect(() => { isDailyChallengeRef.current = isDailyChallenge }, [isDailyChallenge])
+  useEffect(() => { dailyChallengeDateRef.current = dailyChallengeDate }, [dailyChallengeDate])
 
   const [dailyCompleted, setDailyCompleted] = useState(() => isDailyCompleted())
   const refreshDaily = useCallback(() => setDailyCompleted(isDailyCompleted()), [])
@@ -56,7 +59,9 @@ export function GameControls() {
       playRef.current('complete')
       prevIsCompleteRef.current = true
 
-      if (isDailyChallengeRef.current && !isDailyCompleted()) {
+      const completedTodayDaily =
+        isDailyChallengeRef.current && dailyChallengeDateRef.current === getTodayString()
+      if (completedTodayDaily && !isDailyCompleted()) {
         markDailyCompleted(elapsedTimeRef.current)
         queueMicrotask(() => setDailyCompleted(true))
       }

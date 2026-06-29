@@ -11,7 +11,12 @@ import styles from './GamePage.module.css'
 function GameContent() {
   const { state } = useGame()
   const { theme, toggle } = useTheme()
-  const { enabled: soundEnabled, toggle: toggleSound } = useSound()
+  const {
+    enabled: soundEnabled,
+    musicEnabled,
+    toggle: toggleSound,
+    toggleMusic,
+  } = useSound()
   const { isPaused } = state
 
   return (
@@ -27,6 +32,15 @@ function GameContent() {
             title={soundEnabled ? '关闭音效' : '开启音效'}
           >
             {soundEnabled ? '🔊' : '🔇'}
+          </button>
+          <button
+            className={styles.iconButton}
+            type="button"
+            onClick={toggleMusic}
+            aria-label={musicEnabled ? '关闭背景音乐' : '开启背景音乐'}
+            title={musicEnabled ? '关闭背景音乐' : '开启背景音乐'}
+          >
+            {musicEnabled ? '🎵' : '🎼'}
           </button>
           <button
             className={styles.iconButton}

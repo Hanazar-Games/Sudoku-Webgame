@@ -142,10 +142,9 @@
 
 /* 虚拟数字键盘 */
 .keypad {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
   gap: var(--space-xs);
-  justify-content: center;
   width: 100%;
   margin-top: var(--space-sm);
 }
@@ -156,8 +155,7 @@
   justify-content: center;
   min-width: var(--touch-min);
   min-height: var(--touch-min);
-  flex: 1 1 44px;
-  max-width: 56px;
+  width: 100%;
   padding: var(--space-xs);
   font-size: var(--text-base);
   font-weight: 600;
@@ -214,8 +212,11 @@
     font-size: var(--text-sm);
     min-height: 40px;
     min-width: 40px;
-    max-width: 48px;
     padding: var(--space-xs);
+  }
+
+  .keypad {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
   }
 }
 

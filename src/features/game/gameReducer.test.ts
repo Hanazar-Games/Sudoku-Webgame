@@ -371,6 +371,7 @@ describe('gameReducer', () => {
       expect(next.elapsedTime).toBe(0)
       expect(next.isNoteMode).toBe(false)
       expect(next.isDailyChallenge).toBe(false)
+      expect(next.dailyChallengeDate).toBeNull()
       expect(next.moveHistory.length).toBe(1)
       expect(next.historyIndex).toBe(0)
     })
@@ -383,6 +384,7 @@ describe('gameReducer', () => {
 
       expect(next.difficulty).toBe('medium')
       expect(next.isDailyChallenge).toBe(true)
+      expect(next.dailyChallengeDate).toMatch(/^\d{4}-\d{2}-\d{2}$/)
       expect(next.selectedCell).toBeNull()
       expect(next.isComplete).toBe(false)
       expect(next.elapsedTime).toBe(0)
