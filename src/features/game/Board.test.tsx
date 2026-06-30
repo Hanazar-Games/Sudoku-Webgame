@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { beforeEach, describe, it, expect } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import { Board } from './Board'
 import { GameProvider } from './GameProvider'
@@ -8,6 +8,10 @@ function renderWithProvider(ui: React.ReactNode) {
 }
 
 describe('Board', () => {
+  beforeEach(() => {
+    localStorage.clear()
+  })
+
   it('renders 81 cells', () => {
     renderWithProvider(<Board />)
     const cells = screen.getAllByRole('button')
@@ -41,10 +45,7 @@ describe('Board', () => {
     const cells = screen.getAllByRole('button')
 
     // Find a fixed cell (has a number and is fixed in the puzzle)
-    const fixedCell = cells.find((c) => {
-      const text = c.textContent
-      return text !== '' && text !== null
-    })
+    const fixedCell = cells.find((c) => c.getAttribute('aria-label')?.includes('固定'))
     if (!fixedCell) throw new Error('No fixed cell found')
 
     const originalText = fixedCell.textContent

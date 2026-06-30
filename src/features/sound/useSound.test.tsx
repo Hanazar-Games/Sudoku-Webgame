@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { useSound } from './useSound'
 
 const oscillatorStarts: number[] = []
+const oscillatorStops: Array<number | undefined> = []
 
 class MockGain {
   gain = {
@@ -20,7 +21,9 @@ class MockOscillator {
   start = vi.fn((time?: number) => {
     oscillatorStarts.push(time ?? 0)
   })
-  stop = vi.fn()
+  stop = vi.fn((time?: number) => {
+    oscillatorStops.push(time)
+  })
 }
 
 class MockAudioContext {
@@ -59,6 +62,7 @@ describe('useSound', () => {
   beforeEach(() => {
     localStorage.clear()
     oscillatorStarts.length = 0
+    oscillatorStops.length = 0
     vi.stubGlobal('AudioContext', MockAudioContext)
   })
 
@@ -87,6 +91,7 @@ describe('useSound', () => {
 
     expect(screen.getByTestId('first-music')).toHaveTextContent('off')
     expect(screen.getByTestId('second-music')).toHaveTextContent('off')
+    expect(oscillatorStops.filter((time) => time === undefined)).toHaveLength(12)
 
     fireEvent.click(screen.getByRole('button', { name: 'Toggle first' }))
 

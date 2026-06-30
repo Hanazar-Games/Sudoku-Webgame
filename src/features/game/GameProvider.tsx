@@ -95,6 +95,30 @@ export function GameProvider({ children }: { children: ReactNode }) {
     latestStateRef.current = state
   }, [state])
 
+  useEffect(() => {
+    function flushSave() {
+      if (saveTimerRef.current) {
+        clearTimeout(saveTimerRef.current)
+        saveTimerRef.current = null
+      }
+      saveState(latestStateRef.current)
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') {
+        flushSave()
+      }
+    }
+
+    window.addEventListener('pagehide', flushSave)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    return () => {
+      window.removeEventListener('pagehide', flushSave)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      flushSave()
+    }
+  }, [])
+
   // Timer
   useEffect(() => {
     if (state.isPaused || state.isComplete) return

@@ -11,6 +11,7 @@ let cachedMusicEnabled: boolean | null = null
 let sharedAudioContext: AudioContext | null = null
 let musicTimer: ReturnType<typeof setTimeout> | null = null
 let musicGeneration = 0
+const activeMusicOscillators = new Set<OscillatorNode>()
 
 function createAudioContext(): AudioContext | null {
   if (sharedAudioContext) return sharedAudioContext
@@ -104,6 +105,10 @@ function playMusicTone(
 
   osc.start(startTime)
   osc.stop(startTime + duration + 0.02)
+  activeMusicOscillators.add(osc)
+  osc.onended = () => {
+    activeMusicOscillators.delete(osc)
+  }
 }
 
 function scheduleMusicLoop(ctx: AudioContext, generation: number): void {
@@ -145,6 +150,14 @@ function stopMusic(): void {
     clearTimeout(musicTimer)
     musicTimer = null
   }
+  activeMusicOscillators.forEach((osc) => {
+    try {
+      osc.stop()
+    } catch {
+      // Already stopped or not yet started
+    }
+  })
+  activeMusicOscillators.clear()
 }
 
 function getInitialEnabled(): boolean {

@@ -65,4 +65,27 @@ describe('GameProvider', () => {
     expect(saved.elapsedTime).toBeGreaterThan(0)
     expect(saved.board?.flat().some((cell) => !cell.isFixed && cell.value === 5)).toBe(true)
   })
+
+  it('flushes a pending save when the page is hidden', () => {
+    render(
+      <GameProvider>
+        <SaveHarness />
+      </GameProvider>
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Fill editable cell' }))
+    expect(localStorage.getItem(SAVE_KEY)).toBeNull()
+
+    Object.defineProperty(document, 'visibilityState', {
+      configurable: true,
+      value: 'hidden',
+    })
+    document.dispatchEvent(new Event('visibilitychange'))
+
+    const saved = JSON.parse(localStorage.getItem(SAVE_KEY) ?? '{}') as {
+      board?: Array<Array<{ isFixed: boolean; value: number | null }>>
+    }
+
+    expect(saved.board?.flat().some((cell) => !cell.isFixed && cell.value === 5)).toBe(true)
+  })
 })
