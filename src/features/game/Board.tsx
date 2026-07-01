@@ -14,17 +14,21 @@ function focusCell(row: number, col: number) {
 export function Board() {
   const { state, dispatch } = useGame()
   const { play } = useSound()
-  const { board, solution, selectedCell, isPaused } = state
+  const { board, solution, selectedCell, isPaused, isNoteMode } = state
 
   const boardRef = useRef(board)
+  const solutionRef = useRef(solution)
   const selectedCellRef = useRef(selectedCell)
   const playRef = useRef(play)
   const isPausedRef = useRef(isPaused)
+  const isNoteModeRef = useRef(isNoteMode)
 
   useEffect(() => { boardRef.current = board }, [board])
+  useEffect(() => { solutionRef.current = solution }, [solution])
   useEffect(() => { selectedCellRef.current = selectedCell }, [selectedCell])
   useEffect(() => { playRef.current = play }, [play])
   useEffect(() => { isPausedRef.current = isPaused }, [isPaused])
+  useEffect(() => { isNoteModeRef.current = isNoteMode }, [isNoteMode])
 
   const handleSelectCell = useCallback(
     (row: number, col: number) => {
@@ -67,15 +71,30 @@ export function Board() {
 
       const currentSelected = selectedCellRef.current
       const currentBoard = boardRef.current
+      const currentSolution = solutionRef.current
       const currentPlay = playRef.current
 
       // 数字输入 1-9
       if (e.key >= '1' && e.key <= '9') {
         e.preventDefault()
-        if (currentSelected && !currentBoard[currentSelected.row][currentSelected.col].isFixed) {
-          currentPlay('fill')
+        const value = parseInt(e.key, 10)
+        if (currentSelected) {
+          const cell = currentBoard[currentSelected.row][currentSelected.col]
+          if (!cell.isFixed) {
+            if (isNoteModeRef.current) {
+              if (cell.value === null) {
+                currentPlay('toggle')
+              }
+            } else {
+              currentPlay(
+                value === currentSolution[currentSelected.row][currentSelected.col]
+                  ? 'fill'
+                  : 'error'
+              )
+            }
+          }
         }
-        dispatch({ type: 'SET_VALUE', value: parseInt(e.key, 10) })
+        dispatch({ type: 'SET_VALUE', value })
         return
       }
 

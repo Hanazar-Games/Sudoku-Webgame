@@ -23,6 +23,9 @@ export function GameControls() {
     errorCount,
     isDailyChallenge,
     dailyChallengeDate,
+    board,
+    solution,
+    selectedCell,
   } = state
 
   const canUndo = historyIndex > 0
@@ -47,6 +50,34 @@ export function GameControls() {
 
   const [dailyCompleted, setDailyCompleted] = useState(() => isDailyCompleted())
   const refreshDaily = useCallback(() => setDailyCompleted(isDailyCompleted()), [])
+
+  const playInputFeedback = useCallback(
+    (value: number) => {
+      if (!selectedCell) return
+
+      const cell = board[selectedCell.row][selectedCell.col]
+      if (cell.isFixed) return
+
+      if (isNoteMode) {
+        if (cell.value === null) {
+          play('toggle')
+        }
+        return
+      }
+
+      play(value === solution[selectedCell.row][selectedCell.col] ? 'fill' : 'error')
+    },
+    [board, isNoteMode, play, selectedCell, solution]
+  )
+
+  const playClearFeedback = useCallback(() => {
+    if (!selectedCell) return
+
+    const cell = board[selectedCell.row][selectedCell.col]
+    if (!cell.isFixed) {
+      play('clear')
+    }
+  }, [board, play, selectedCell])
 
   useEffect(() => {
     // Reset tracking on new game (elapsedTime resets to 0 while not complete)
@@ -185,7 +216,7 @@ export function GameControls() {
             key={n}
             className={styles.key}
             type="button"
-            onClick={() => { play('fill'); dispatch({ type: 'SET_VALUE', value: n }) }}
+            onClick={() => { playInputFeedback(n); dispatch({ type: 'SET_VALUE', value: n }) }}
             disabled={isPaused || isComplete}
             aria-label={`输入 ${n}`}
           >
@@ -195,7 +226,7 @@ export function GameControls() {
         <button
           className={`${styles.key} ${styles.keyClear}`}
           type="button"
-          onClick={() => dispatch({ type: 'CLEAR_VALUE' })}
+          onClick={() => { playClearFeedback(); dispatch({ type: 'CLEAR_VALUE' }) }}
           disabled={isPaused || isComplete}
           aria-label="清除"
         >

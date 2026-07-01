@@ -8,10 +8,10 @@
 }
 
 .topRow {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(78px, max-content) 1fr max-content;
   gap: var(--space-sm);
   width: 100%;
-  justify-content: space-between;
   align-items: center;
 }
 
@@ -19,6 +19,18 @@
   display: flex;
   gap: var(--space-sm);
   align-items: center;
+  justify-self: end;
+  min-width: 0;
+}
+
+.timer {
+  justify-self: center;
+  min-width: 5ch;
+  color: var(--color-text);
+  font-size: var(--text-base);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
 }
 
 .actionRow {
@@ -100,6 +112,7 @@
 .select {
   display: inline-flex;
   align-items: center;
+  min-width: 78px;
   min-height: var(--touch-min);
   padding: var(--space-sm) var(--space-md);
   font-size: var(--text-sm);
@@ -206,6 +219,28 @@
   .select {
     font-size: var(--text-xs);
     padding: var(--space-xs) var(--space-sm);
+    min-width: 68px;
+    padding-right: 1.75rem;
+    background-position: right 0.5rem center;
+  }
+
+  .buttonPrimary {
+    min-width: 64px;
+    padding-right: var(--space-sm);
+    padding-left: var(--space-sm);
+  }
+
+  .topRow {
+    gap: var(--space-xs);
+    grid-template-columns: minmax(68px, max-content) minmax(5ch, 1fr) max-content;
+  }
+
+  .topRight {
+    gap: var(--space-xs);
+  }
+
+  .timer {
+    font-size: var(--text-sm);
   }
 
   .key {
