@@ -14,13 +14,14 @@ function focusCell(row: number, col: number) {
 export function Board() {
   const { state, dispatch } = useGame()
   const { play } = useSound()
-  const { board, solution, selectedCell, isPaused, isNoteMode } = state
+  const { board, solution, selectedCell, isPaused, isComplete, isNoteMode } = state
 
   const boardRef = useRef(board)
   const solutionRef = useRef(solution)
   const selectedCellRef = useRef(selectedCell)
   const playRef = useRef(play)
   const isPausedRef = useRef(isPaused)
+  const isCompleteRef = useRef(isComplete)
   const isNoteModeRef = useRef(isNoteMode)
 
   useEffect(() => { boardRef.current = board }, [board])
@@ -28,11 +29,12 @@ export function Board() {
   useEffect(() => { selectedCellRef.current = selectedCell }, [selectedCell])
   useEffect(() => { playRef.current = play }, [play])
   useEffect(() => { isPausedRef.current = isPaused }, [isPaused])
+  useEffect(() => { isCompleteRef.current = isComplete }, [isComplete])
   useEffect(() => { isNoteModeRef.current = isNoteMode }, [isNoteMode])
 
   const handleSelectCell = useCallback(
     (row: number, col: number) => {
-      if (isPausedRef.current) return
+      if (isPausedRef.current || isCompleteRef.current) return
       dispatch({ type: 'SELECT_CELL', row, col })
     },
     [dispatch]
@@ -67,7 +69,7 @@ export function Board() {
         return
       }
 
-      if (isPausedRef.current) return
+      if (isPausedRef.current || isCompleteRef.current) return
 
       const currentSelected = selectedCellRef.current
       const currentBoard = boardRef.current
@@ -85,7 +87,7 @@ export function Board() {
               if (cell.value === null) {
                 currentPlay('toggle')
               }
-            } else {
+            } else if (cell.value !== value) {
               currentPlay(
                 value === currentSolution[currentSelected.row][currentSelected.col]
                   ? 'fill'
@@ -101,8 +103,11 @@ export function Board() {
       // 删除 / 退格
       if (e.key === 'Backspace' || e.key === 'Delete') {
         e.preventDefault()
-        if (currentSelected && !currentBoard[currentSelected.row][currentSelected.col].isFixed) {
-          currentPlay('clear')
+        if (currentSelected) {
+          const cell = currentBoard[currentSelected.row][currentSelected.col]
+          if (!cell.isFixed && (cell.value !== null || cell.candidates.length > 0)) {
+            currentPlay('clear')
+          }
         }
         dispatch({ type: 'CLEAR_VALUE' })
         return
@@ -135,9 +140,9 @@ export function Board() {
 
   // Focus management: move focus to selected cell on keyboard navigation
   useEffect(() => {
-    if (isPaused || !selectedCell) return
+    if (isPaused || isComplete || !selectedCell) return
     focusCell(selectedCell.row, selectedCell.col)
-  }, [selectedCell, isPaused])
+  }, [selectedCell, isPaused, isComplete])
 
   const selectedValue = selectedCell
     ? board[selectedCell.row][selectedCell.col].value
@@ -149,7 +154,7 @@ export function Board() {
       role="grid"
       aria-label="数独棋盘"
       aria-describedby="board-instructions"
-      inert={isPaused || undefined}
+      inert={isPaused || isComplete || undefined}
     >
       {board.map((row) =>
         row.map((cell) => {

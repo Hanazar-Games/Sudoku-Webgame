@@ -182,7 +182,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'SELECT_CELL': {
-      if (state.isPaused) return state
+      if (state.isPaused || state.isComplete) return state
       return {
         ...state,
         selectedCell: { row: action.row, col: action.col },
@@ -212,6 +212,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         return pushHistory(state, newBoard)
       }
 
+      if (cell.value === action.value) return state
+
       // Normal mode: set value and clear candidates
       newBoard[row][col].value = action.value
       newBoard[row][col].candidates = []
@@ -230,6 +232,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const { row, col } = state.selectedCell
       const cell = state.board[row][col]
       if (cell.isFixed) return state
+      if (cell.value === null && cell.candidates.length === 0) return state
 
       const newBoard = cloneBoard(state.board)
 
@@ -244,7 +247,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'MOVE_SELECTION': {
-      if (state.isPaused) return state
+      if (state.isPaused || state.isComplete) return state
       const current = state.selectedCell ?? { row: 0, col: 0 }
       let { row, col } = current
 
@@ -302,6 +305,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'TOGGLE_NOTE_MODE': {
+      if (state.isPaused || state.isComplete) return state
       return {
         ...state,
         isNoteMode: !state.isNoteMode,
@@ -309,6 +313,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'UNDO': {
+      if (state.isPaused) return state
       if (state.historyIndex <= 0) return state
       const newIndex = state.historyIndex - 1
       const newBoard = cloneBoard(state.moveHistory[newIndex])
@@ -322,6 +327,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
 
     case 'REDO': {
+      if (state.isPaused) return state
       if (state.historyIndex >= state.moveHistory.length - 1) return state
       const newIndex = state.historyIndex + 1
       const newBoard = cloneBoard(state.moveHistory[newIndex])

@@ -37,6 +37,13 @@ describe('gameReducer', () => {
       const next = gameReducer(paused, { type: 'SELECT_CELL', row: 3, col: 4 })
       expect(next.selectedCell).toBeNull()
     })
+
+    it('is blocked when complete', () => {
+      const state = createInitialState('easy')
+      const complete = { ...state, isComplete: true }
+      const next = gameReducer(complete, { type: 'SELECT_CELL', row: 3, col: 4 })
+      expect(next.selectedCell).toBeNull()
+    })
   })
 
   describe('SET_VALUE', () => {
@@ -126,6 +133,18 @@ describe('gameReducer', () => {
       const withNegative = gameReducer(selected, { type: 'SET_VALUE', value: -1 })
       expect(withNegative.board[row][col].value).toBeNull()
     })
+
+    it('does not create history or extra errors when entering the same value again', () => {
+      const state = createInitialState('easy')
+      const { row, col } = getEditableCell(state)
+      const selected = gameReducer(state, { type: 'SELECT_CELL', row, col })
+      const filled = gameReducer(selected, { type: 'SET_VALUE', value: 5 })
+      const repeated = gameReducer(filled, { type: 'SET_VALUE', value: 5 })
+
+      expect(repeated).toBe(filled)
+      expect(repeated.moveHistory.length).toBe(filled.moveHistory.length)
+      expect(repeated.errorCount).toBe(filled.errorCount)
+    })
   })
 
   describe('CLEAR_VALUE', () => {
@@ -175,6 +194,16 @@ describe('gameReducer', () => {
       const next = gameReducer(completeState, { type: 'CLEAR_VALUE' })
       expect(next.board[row][col].value).toBe(5)
     })
+
+    it('does not create history when clearing an already empty cell', () => {
+      const state = createInitialState('easy')
+      const { row, col } = getEditableCell(state)
+      const selected = gameReducer(state, { type: 'SELECT_CELL', row, col })
+      const cleared = gameReducer(selected, { type: 'CLEAR_VALUE' })
+
+      expect(cleared).toBe(selected)
+      expect(cleared.moveHistory.length).toBe(selected.moveHistory.length)
+    })
   })
 
   describe('MOVE_SELECTION', () => {
@@ -194,6 +223,14 @@ describe('gameReducer', () => {
       const selected = gameReducer(state, { type: 'SELECT_CELL', row: 4, col: 4 })
       const paused = { ...selected, isPaused: true }
       const next = gameReducer(paused, { type: 'MOVE_SELECTION', direction: 'up' })
+      expect(next.selectedCell).toEqual({ row: 4, col: 4 })
+    })
+
+    it('is blocked when complete', () => {
+      const state = createInitialState('easy')
+      const selected = gameReducer(state, { type: 'SELECT_CELL', row: 4, col: 4 })
+      const complete = { ...selected, isComplete: true }
+      const next = gameReducer(complete, { type: 'MOVE_SELECTION', direction: 'up' })
       expect(next.selectedCell).toEqual({ row: 4, col: 4 })
     })
   })
@@ -288,6 +325,15 @@ describe('gameReducer', () => {
       const off = gameReducer(next, { type: 'TOGGLE_NOTE_MODE' })
       expect(off.isNoteMode).toBe(false)
     })
+
+    it('is blocked when paused or complete', () => {
+      const state = createInitialState('easy')
+      const paused = { ...state, isPaused: true }
+      const complete = { ...state, isComplete: true }
+
+      expect(gameReducer(paused, { type: 'TOGGLE_NOTE_MODE' })).toBe(paused)
+      expect(gameReducer(complete, { type: 'TOGGLE_NOTE_MODE' })).toBe(complete)
+    })
   })
 
   describe('UNDO / REDO', () => {
@@ -354,6 +400,23 @@ describe('gameReducer', () => {
       const complete = { ...filled, isComplete: true }
       const undone = gameReducer(complete, { type: 'UNDO' })
       expect(undone.isComplete).toBe(false)
+    })
+
+    it('is blocked when paused', () => {
+      const state = createInitialState('easy')
+      const { row, col } = getEditableCell(state)
+      const selected = gameReducer(state, { type: 'SELECT_CELL', row, col })
+      const filled = gameReducer(selected, { type: 'SET_VALUE', value: 5 })
+      const undone = gameReducer(filled, { type: 'UNDO' })
+
+      expect(gameReducer({ ...filled, isPaused: true }, { type: 'UNDO' })).toEqual({
+        ...filled,
+        isPaused: true,
+      })
+      expect(gameReducer({ ...undone, isPaused: true }, { type: 'REDO' })).toEqual({
+        ...undone,
+        isPaused: true,
+      })
     })
   })
 

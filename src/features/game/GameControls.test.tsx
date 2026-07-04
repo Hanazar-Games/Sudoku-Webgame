@@ -111,6 +111,14 @@ describe('GameControls', () => {
     expect(dispatch).toHaveBeenCalledWith({ type: 'NEW_GAME', difficulty: 'hard' })
   })
 
+  it('disables value actions until an editable cell is selected', () => {
+    render(<ControlsHarness isDailyChallenge={false} />)
+
+    expect(screen.getByRole('button', { name: '提示' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '输入 1' })).toBeDisabled()
+    expect(screen.getByRole('button', { name: '清除' })).toBeDisabled()
+  })
+
   it('plays the error sound when the keypad enters an incorrect value', () => {
     const state = createInitialState('easy')
     const selectedCell = state.board.flat().find((cell) => !cell.isFixed)

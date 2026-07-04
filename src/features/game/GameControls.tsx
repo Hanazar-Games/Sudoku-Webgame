@@ -31,6 +31,23 @@ export function GameControls() {
   const canUndo = historyIndex > 0
   const canRedo = historyIndex < moveHistory.length - 1
   const diffStats = stats[difficulty]
+  const selectedCellData = selectedCell ? board[selectedCell.row][selectedCell.col] : null
+  const selectedSolution = selectedCell ? solution[selectedCell.row][selectedCell.col] : null
+  const canEditSelected =
+    !isPaused && !isComplete && selectedCellData !== null && !selectedCellData.isFixed
+  const canEnterSelected =
+    canEditSelected &&
+    selectedCellData !== null &&
+    (!isNoteMode || selectedCellData.value === null)
+  const canClearSelected =
+    canEditSelected &&
+    selectedCellData !== null &&
+    (selectedCellData.value !== null || selectedCellData.candidates.length > 0)
+  const canUseHint =
+    canEditSelected &&
+    selectedCellData !== null &&
+    selectedSolution !== null &&
+    selectedCellData.value !== selectedSolution
 
   // Detect game completion and record stats (once per game)
   const prevIsCompleteRef = useRef(isComplete)
@@ -56,7 +73,7 @@ export function GameControls() {
       if (!selectedCell) return
 
       const cell = board[selectedCell.row][selectedCell.col]
-      if (cell.isFixed) return
+      if (!canEditSelected || cell.isFixed) return
 
       if (isNoteMode) {
         if (cell.value === null) {
@@ -65,19 +82,18 @@ export function GameControls() {
         return
       }
 
+      if (cell.value === value) return
+
       play(value === solution[selectedCell.row][selectedCell.col] ? 'fill' : 'error')
     },
-    [board, isNoteMode, play, selectedCell, solution]
+    [board, canEditSelected, isNoteMode, play, selectedCell, solution]
   )
 
   const playClearFeedback = useCallback(() => {
-    if (!selectedCell) return
-
-    const cell = board[selectedCell.row][selectedCell.col]
-    if (!cell.isFixed) {
+    if (canClearSelected) {
       play('clear')
     }
-  }, [board, play, selectedCell])
+  }, [canClearSelected, play])
 
   useEffect(() => {
     // Reset tracking on new game (elapsedTime resets to 0 while not complete)
@@ -162,6 +178,7 @@ export function GameControls() {
           type="button"
           onClick={() => { play('toggle'); dispatch({ type: 'TOGGLE_NOTE_MODE' }) }}
           aria-pressed={isNoteMode}
+          disabled={isPaused || isComplete}
         >
           笔记
         </button>
@@ -170,7 +187,7 @@ export function GameControls() {
           className={styles.button}
           type="button"
           onClick={() => { play('hint'); dispatch({ type: 'USE_HINT' }) }}
-          disabled={isPaused || isComplete}
+          disabled={!canUseHint}
         >
           提示
         </button>
@@ -179,7 +196,7 @@ export function GameControls() {
           className={styles.button}
           type="button"
           onClick={() => dispatch({ type: 'UNDO' })}
-          disabled={!canUndo}
+          disabled={!canUndo || isPaused}
           aria-label="撤销"
         >
           撤销
@@ -189,7 +206,7 @@ export function GameControls() {
           className={styles.button}
           type="button"
           onClick={() => dispatch({ type: 'REDO' })}
-          disabled={!canRedo}
+          disabled={!canRedo || isPaused}
           aria-label="重做"
         >
           重做
@@ -217,7 +234,7 @@ export function GameControls() {
             className={styles.key}
             type="button"
             onClick={() => { playInputFeedback(n); dispatch({ type: 'SET_VALUE', value: n }) }}
-            disabled={isPaused || isComplete}
+            disabled={!canEnterSelected}
             aria-label={`输入 ${n}`}
           >
             {n}
@@ -227,7 +244,7 @@ export function GameControls() {
           className={`${styles.key} ${styles.keyClear}`}
           type="button"
           onClick={() => { playClearFeedback(); dispatch({ type: 'CLEAR_VALUE' }) }}
-          disabled={isPaused || isComplete}
+          disabled={!canClearSelected}
           aria-label="清除"
         >
           ⌫

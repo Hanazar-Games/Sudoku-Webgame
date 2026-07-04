@@ -205,6 +205,11 @@
   border-color: var(--color-danger);
 }
 
+.keyClear:disabled {
+  color: var(--color-text-secondary);
+  border-color: var(--color-border);
+}
+
 @media (max-width: 480px) {
   .controls {
     gap: var(--space-xs);
