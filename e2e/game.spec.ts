@@ -14,6 +14,28 @@ test.describe('Sudoku Game', () => {
     await page.goto('/')
   })
 
+  test('loads without missing resources or console errors', async ({ page }) => {
+    const failedResources: string[] = []
+    const consoleErrors: string[] = []
+
+    page.on('response', (response) => {
+      const url = response.url()
+      if (url.startsWith('http') && response.status() >= 400) {
+        failedResources.push(`${response.status()} ${url}`)
+      }
+    })
+    page.on('console', (message) => {
+      if (message.type() === 'error') {
+        consoleErrors.push(message.text())
+      }
+    })
+
+    await page.reload({ waitUntil: 'networkidle' })
+
+    expect(failedResources).toEqual([])
+    expect(consoleErrors).toEqual([])
+  })
+
   test('renders 81 board cells', async ({ page }) => {
     const cells = page.locator('[role="grid"] [role="button"]')
     await expect(cells).toHaveCount(81)
