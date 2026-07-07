@@ -1,0 +1,16 @@
+{
+  "name": "数独 Sudoku",
+  "short_name": "数独",
+  "description": "一个简洁、响应式的 Web 数独游戏，支持每日挑战、统计追踪和深色模式。",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

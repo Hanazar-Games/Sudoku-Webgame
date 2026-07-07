@@ -2,15 +2,54 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="%BASE_URL%favicon.svg" />
+    <script>
+      ;(() => {
+        const usesBuiltAssets =
+          location.hostname.endsWith('github.io') || location.pathname.startsWith('/Sudoku-Webgame/')
+        const baseUrl = usesBuiltAssets ? '/Sudoku-Webgame/' : '/'
+        const icon = document.createElement('link')
+        icon.rel = 'icon'
+        icon.type = 'image/svg+xml'
+        icon.href = `${baseUrl}favicon.svg`
+        document.head.append(icon)
+
+        const manifest = document.createElement('link')
+        manifest.rel = 'manifest'
+        manifest.href = `${baseUrl}manifest.json`
+        document.head.append(manifest)
+      })()
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content="一个简洁、响应式的 Web 数独游戏" />
     <meta name="theme-color" content="#3b82f6" />
-    <link rel="manifest" href="%BASE_URL%manifest.json" />
     <title>数独 Sudoku</title>
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    <script>
+      ;(() => {
+        const usesBuiltAssets =
+          location.hostname.endsWith('github.io') || location.pathname.startsWith('/Sudoku-Webgame/')
+        const baseUrl = usesBuiltAssets ? '/Sudoku-Webgame/' : '/'
+
+        if (usesBuiltAssets) {
+          const stylesheet = document.createElement('link')
+          stylesheet.rel = 'stylesheet'
+          stylesheet.href = `${baseUrl}assets/app.css`
+          document.head.append(stylesheet)
+
+          const script = document.createElement('script')
+          script.type = 'module'
+          script.src = `${baseUrl}assets/main.js`
+          document.body.append(script)
+          return
+        }
+
+        const script = document.createElement('script')
+        script.type = 'module'
+        script.src = '/src/main.tsx'
+        document.body.append(script)
+      })()
+    </script>
   </body>
 </html>
