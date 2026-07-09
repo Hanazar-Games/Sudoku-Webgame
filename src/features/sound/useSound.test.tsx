@@ -140,4 +140,28 @@ describe('useSound', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Toggle music' }))
     expect(screen.getByTestId('first-music')).toHaveTextContent('off')
   })
+
+  it('shares page lifecycle listeners across hook instances', () => {
+    const documentAdd = vi.spyOn(document, 'addEventListener')
+    const documentRemove = vi.spyOn(document, 'removeEventListener')
+    const windowAdd = vi.spyOn(window, 'addEventListener')
+    const windowRemove = vi.spyOn(window, 'removeEventListener')
+
+    const { unmount } = render(<SoundHarness />)
+
+    expect(documentAdd.mock.calls.filter(([type]) => type === 'visibilitychange')).toHaveLength(1)
+    expect(windowAdd.mock.calls.filter(([type]) => type === 'pagehide')).toHaveLength(1)
+    expect(windowAdd.mock.calls.filter(([type]) => type === 'pageshow')).toHaveLength(1)
+
+    unmount()
+
+    expect(documentRemove.mock.calls.filter(([type]) => type === 'visibilitychange')).toHaveLength(1)
+    expect(windowRemove.mock.calls.filter(([type]) => type === 'pagehide')).toHaveLength(1)
+    expect(windowRemove.mock.calls.filter(([type]) => type === 'pageshow')).toHaveLength(1)
+
+    documentAdd.mockRestore()
+    documentRemove.mockRestore()
+    windowAdd.mockRestore()
+    windowRemove.mockRestore()
+  })
 })

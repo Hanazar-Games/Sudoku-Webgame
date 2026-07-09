@@ -12,6 +12,7 @@ let sharedAudioContext: AudioContext | null = null
 let musicTimer: ReturnType<typeof setTimeout> | null = null
 let musicGeneration = 0
 let musicBlockedByPageLifecycle = false
+let musicLifecycleSubscribers = 0
 const activeMusicOscillators = new Set<OscillatorNode>()
 
 function createAudioContext(): AudioContext | null {
@@ -174,6 +175,44 @@ function resumeMusicForPageLifecycle(): void {
   }
 }
 
+function handleMusicVisibilityChange() {
+  if (document.visibilityState === 'hidden') {
+    pauseMusicForPageLifecycle()
+  } else {
+    resumeMusicForPageLifecycle()
+  }
+}
+
+function handleMusicPageHide() {
+  pauseMusicForPageLifecycle()
+}
+
+function handleMusicPageShow() {
+  if (document.visibilityState !== 'hidden') {
+    resumeMusicForPageLifecycle()
+  }
+}
+
+function subscribeToMusicLifecycle(): () => void {
+  if (musicLifecycleSubscribers === 0) {
+    document.addEventListener('visibilitychange', handleMusicVisibilityChange)
+    window.addEventListener('pagehide', handleMusicPageHide)
+    window.addEventListener('pageshow', handleMusicPageShow)
+  }
+
+  musicLifecycleSubscribers += 1
+
+  return () => {
+    musicLifecycleSubscribers = Math.max(0, musicLifecycleSubscribers - 1)
+
+    if (musicLifecycleSubscribers === 0) {
+      document.removeEventListener('visibilitychange', handleMusicVisibilityChange)
+      window.removeEventListener('pagehide', handleMusicPageHide)
+      window.removeEventListener('pageshow', handleMusicPageShow)
+    }
+  }
+}
+
 function getInitialEnabled(): boolean {
   if (cachedEnabled !== null) return cachedEnabled
 
@@ -250,34 +289,7 @@ export function useSound() {
       startMusic()
     }
   }, [musicEnabled])
-  useEffect(() => {
-    function handleVisibilityChange() {
-      if (document.visibilityState === 'hidden') {
-        pauseMusicForPageLifecycle()
-      } else {
-        resumeMusicForPageLifecycle()
-      }
-    }
-
-    function handlePageHide() {
-      pauseMusicForPageLifecycle()
-    }
-
-    function handlePageShow() {
-      if (document.visibilityState !== 'hidden') {
-        resumeMusicForPageLifecycle()
-      }
-    }
-
-    document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('pagehide', handlePageHide)
-    window.addEventListener('pageshow', handlePageShow)
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('pagehide', handlePageHide)
-      window.removeEventListener('pageshow', handlePageShow)
-    }
-  }, [])
+  useEffect(() => subscribeToMusicLifecycle(), [])
 
   const play = useCallback(
     (type: SoundType) => {
