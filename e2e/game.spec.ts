@@ -36,6 +36,28 @@ test.describe('Sudoku Game', () => {
     expect(consoleErrors).toEqual([])
   })
 
+  test('loads from the GitHub Pages project path without source entry requests', async ({ page }) => {
+    const failedResources: string[] = []
+    const requestedUrls: string[] = []
+
+    page.on('request', (request) => requestedUrls.push(request.url()))
+    page.on('response', (response) => {
+      const url = response.url()
+      if (url.startsWith('http') && response.status() >= 400) {
+        failedResources.push(`${response.status()} ${url}`)
+      }
+    })
+
+    await page.goto('/Sudoku-Webgame/', { waitUntil: 'networkidle' })
+
+    await expect(page.locator('[data-testid^="cell-"]')).toHaveCount(81)
+    expect(failedResources).toEqual([])
+    expect(requestedUrls.some((url) => url.endsWith('/src/main.tsx'))).toBe(false)
+    expect(requestedUrls.some((url) => url.endsWith('/Sudoku-Webgame/assets/main.js'))).toBe(
+      true
+    )
+  })
+
   test('renders 81 board cells', async ({ page }) => {
     const cells = page.locator('[role="grid"] [role="button"]')
     await expect(cells).toHaveCount(81)

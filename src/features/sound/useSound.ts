@@ -11,6 +11,7 @@ let cachedMusicEnabled: boolean | null = null
 let sharedAudioContext: AudioContext | null = null
 let musicTimer: ReturnType<typeof setTimeout> | null = null
 let musicGeneration = 0
+let musicBlockedByPageLifecycle = false
 const activeMusicOscillators = new Set<OscillatorNode>()
 
 function createAudioContext(): AudioContext | null {
@@ -112,7 +113,7 @@ function playMusicTone(
 }
 
 function scheduleMusicLoop(ctx: AudioContext, generation: number): void {
-  if (generation !== musicGeneration || !cachedMusicEnabled) return
+  if (generation !== musicGeneration || !cachedMusicEnabled || musicBlockedByPageLifecycle) return
 
   const now = ctx.currentTime
   const chords = [
@@ -132,6 +133,7 @@ function scheduleMusicLoop(ctx: AudioContext, generation: number): void {
 }
 
 function startMusic(): void {
+  if (musicBlockedByPageLifecycle) return
   const ctx = createAudioContext()
   if (!ctx) return
   if (ctx.state === 'suspended') {
@@ -158,6 +160,18 @@ function stopMusic(): void {
     }
   })
   activeMusicOscillators.clear()
+}
+
+function pauseMusicForPageLifecycle(): void {
+  musicBlockedByPageLifecycle = true
+  stopMusic()
+}
+
+function resumeMusicForPageLifecycle(): void {
+  musicBlockedByPageLifecycle = false
+  if (cachedMusicEnabled) {
+    startMusic()
+  }
 }
 
 function getInitialEnabled(): boolean {
@@ -202,7 +216,7 @@ function setGlobalMusicEnabled(enabled: boolean): void {
   } catch {
     // Ignore
   }
-  if (enabled) {
+  if (enabled && !musicBlockedByPageLifecycle) {
     startMusic()
   } else {
     stopMusic()
@@ -236,6 +250,34 @@ export function useSound() {
       startMusic()
     }
   }, [musicEnabled])
+  useEffect(() => {
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'hidden') {
+        pauseMusicForPageLifecycle()
+      } else {
+        resumeMusicForPageLifecycle()
+      }
+    }
+
+    function handlePageHide() {
+      pauseMusicForPageLifecycle()
+    }
+
+    function handlePageShow() {
+      if (document.visibilityState !== 'hidden') {
+        resumeMusicForPageLifecycle()
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('pagehide', handlePageHide)
+    window.addEventListener('pageshow', handlePageShow)
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('pagehide', handlePageHide)
+      window.removeEventListener('pageshow', handlePageShow)
+    }
+  }, [])
 
   const play = useCallback(
     (type: SoundType) => {

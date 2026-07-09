@@ -58,11 +58,19 @@ function SoundHarness() {
   )
 }
 
+function setDocumentVisibility(state: DocumentVisibilityState) {
+  Object.defineProperty(document, 'visibilityState', {
+    configurable: true,
+    value: state,
+  })
+}
+
 describe('useSound', () => {
   beforeEach(() => {
     localStorage.clear()
     oscillatorStarts.length = 0
     oscillatorStops.length = 0
+    setDocumentVisibility('visible')
     vi.stubGlobal('AudioContext', MockAudioContext)
   })
 
@@ -97,5 +105,39 @@ describe('useSound', () => {
 
     expect(screen.getByTestId('first')).toHaveTextContent('off')
     expect(screen.getByTestId('second')).toHaveTextContent('off')
+  })
+
+  it('pauses background music while the page is hidden and resumes when visible', () => {
+    render(<SoundHarness />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle music' }))
+
+    expect(screen.getByTestId('first-music')).toHaveTextContent('on')
+    expect(oscillatorStarts).toHaveLength(12)
+
+    setDocumentVisibility('hidden')
+    document.dispatchEvent(new Event('visibilitychange'))
+
+    expect(screen.getByTestId('first-music')).toHaveTextContent('on')
+    expect(oscillatorStops.filter((time) => time === undefined)).toHaveLength(12)
+
+    setDocumentVisibility('visible')
+    document.dispatchEvent(new Event('visibilitychange'))
+
+    expect(screen.getByTestId('first-music')).toHaveTextContent('on')
+    expect(oscillatorStarts).toHaveLength(24)
+
+    window.dispatchEvent(new Event('pagehide'))
+
+    expect(screen.getByTestId('first-music')).toHaveTextContent('on')
+    expect(oscillatorStops.filter((time) => time === undefined)).toHaveLength(24)
+
+    window.dispatchEvent(new Event('pageshow'))
+
+    expect(screen.getByTestId('first-music')).toHaveTextContent('on')
+    expect(oscillatorStarts).toHaveLength(36)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Toggle music' }))
+    expect(screen.getByTestId('first-music')).toHaveTextContent('off')
   })
 })
